@@ -5,3 +5,9 @@
 //  Created by Chris  on 7/11/25.
 //
 
+# Xcode
+*.xcuserstate
+*.xccheckout
+*.xcscmblueprint
+xcuserdata/
+DerivedData/
