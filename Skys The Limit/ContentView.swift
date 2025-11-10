@@ -10,20 +10,12 @@ import SwiftUI
 struct ContentView: View {
     var body: some View {
         EquationListView()
-            .task {
-                do {
-                    print("posting to db")
-                    try await post_to_database()
-                } catch {
-                    print("Error posting to database: \(error)")
-                }
+            .task { @MainActor in
+                print("posting to db")
+                await post_to_database()
                 
-                do {
-                    print("qureying")
-                    try await list_document_for_user()
-                } catch {
-                    print("error: \(error)")
-                }
+                print("querying")
+                await list_document_for_user()
             }
     }
 }
