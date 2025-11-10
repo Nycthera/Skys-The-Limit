@@ -68,3 +68,25 @@ func get_documents_for_user() async {
         }
     }
 }
+
+func update_document_for_user() async {
+    let userid = deviceID ?? ""
+    let equationsInUpdatFunc = Equations
+
+    do {
+        let row = try await appwrite.table.updateRow(
+            databaseId: databaseID,
+            tableId: tableID,
+            rowId: userid,
+            data: [
+                "userid": userid,
+                "equation": equationsInUpdatFunc
+            ], // optional
+            permissions: [Permission.read(Role.any())] // optional
+            // transactionId: "<TRANSACTION_ID>" // optional
+        )
+        print("Document updated: \(row)")
+    } catch {
+        print("Error updating document: \(error.localizedDescription)")
+    }
+}
