@@ -9,7 +9,7 @@ import SwiftUI
 
 struct ContentView: View {
     var body: some View {
-        Text("hi")
+        MainMenuView()
             .font(.custom("SpaceMono-Regular", size: 18))
             .task { @MainActor in
                 print("posting to db")
