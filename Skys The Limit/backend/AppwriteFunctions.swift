@@ -2,12 +2,12 @@ import Foundation
 import Appwrite
 import UIKit
 import AppwriteModels
-import JSONCodable
 
 // --- Global Constants & Variables ---
 let deviceID = UIDevice.current.identifierForVendor?.uuidString ?? "unknown_device"
 let databaseID = "69114f5e001d9116992a"
 let tableID = "constellation"
+let deviceID = UIDevice.current.identifierForVendor?.uuidString ?? "unknown-device"
 
 // This array will store the unique ID(s) of the user's document(s).
 var userTableIDs: [String] = []
@@ -60,7 +60,7 @@ func list_document_for_user() async {
             print("Fetched row IDs: \(userTableIDs)")
         }
     } catch {
-        print("Error fetching rows: \(error.localizedDescription)")
+        print("Error listing documents: \(error.localizedDescription)")
     }
 }
 
@@ -91,5 +91,50 @@ func update_document_for_user(equations: [String]) async {
         print("Document updated successfully.")
     } catch {
         print("Error updating document: \(error.localizedDescription)")
+    }
+}
+
+// MARK: - Delete (DELETE)
+func delete_document(rowId: String) async {
+    do {
+        try await appwrite.table.deleteRow(
+            databaseId: databaseID,
+            tableId: tableID,
+            rowId: rowId
+        )
+        print("Document deleted: \(rowId)")
+    } catch {
+        print("Error deleting document: \(error.localizedDescription)")
+    }
+}
+
+// MARK: - Share / Unshare
+func toggle_share(rowId: String, share: Bool) async {
+    do {
+        let updated = try await appwrite.table.updateRow(
+            databaseId: databaseID,
+            tableId: tableID,
+            rowId: rowId,
+            data: [
+                "isShared": share
+            ]
+        )
+        print(share ? " Constellation shared: \(updated.id)" : "Constellation unshared: \(updated.id)")
+    } catch {
+        print("Error toggling share state: \(error.localizedDescription)")
+    }
+}
+
+// MARK: - Check shared document (public access)
+func get_shared_document(rowId: String) async {
+    do {
+        let document = try await appwrite.table.getRow(
+            databaseId: databaseID,
+            tableId: tableID,
+            rowId: rowId
+        )
+        print("Shared document fetched: \(document)")
+    } catch {
+        print("Error fetching shared document: \(error.localizedDescription)")
     }
 }
