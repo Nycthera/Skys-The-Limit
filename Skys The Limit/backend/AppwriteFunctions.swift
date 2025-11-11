@@ -3,16 +3,19 @@ import Appwrite
 import UIKit
 import AppwriteModels
 
-// MARK: - Constants
+// --- Global Constants & Variables ---
+let deviceID = UIDevice.current.identifierForVendor?.uuidString ?? "unknown_device"
 let databaseID = "69114f5e001d9116992a"
 let tableID = "constellation"
 let deviceID = UIDevice.current.identifierForVendor?.uuidString ?? "unknown-device"
 
-// MARK: - Globals
+// This array will store the unique ID(s) of the user's document(s).
 var userTableIDs: [String] = []
 
-// MARK: - Create (POST)
-func post_to_database(equations: [String] = ["y=x^2"], isShared: Bool = false) async {
+
+/// Creates a brand new document for a first-time user.
+func post_to_database(equations: [String]) async {
+    print("User has no document. Creating a new one...")
     do {
         let document = try await appwrite.table.createRow(
             databaseId: databaseID,
@@ -20,23 +23,26 @@ func post_to_database(equations: [String] = ["y=x^2"], isShared: Bool = false) a
             rowId: ID.unique(),
             data: [
                 "userid": deviceID,
-                "equations": equations,
-                "isShared": isShared
+                "equations": equations
             ],
             permissions: [
-                Permission.read(Role.user(deviceID)),
-                Permission.update(Role.user(deviceID)),
-                Permission.delete(Role.user(deviceID))
+                Permission.read(Role.any()),
+                Permission.update(Role.any()),
+                Permission.delete(Role.any())
             ]
         )
-        print("Document created: \(document.id)")
+        print("Document created successfully: \(document.id)")
+        // After creating, we should update our list of known IDs.
+        userTableIDs.append(document.id)
     } catch {
         print("Error creating document: \(error.localizedDescription)")
     }
 }
 
-// MARK: - Read (LIST)
-func list_documents_for_user() async {
+
+/// Fetches and stores the document IDs for the current user.
+func list_document_for_user() async {
+    print("Checking for existing documents for user: \(deviceID)...")
     do {
         let rowList = try await appwrite.table.listRows(
             databaseId: databaseID,
@@ -45,37 +51,34 @@ func list_documents_for_user() async {
                 Query.equal("userid", value: deviceID)
             ]
         )
+        // Get all document IDs associated with this user.
         userTableIDs = rowList.rows.map { $0.id }
-        print("User document IDs: \(userTableIDs)")
+        
+        if userTableIDs.isEmpty {
+            print("No documents found for this user.")
+        } else {
+            print("Fetched row IDs: \(userTableIDs)")
+        }
     } catch {
         print("Error listing documents: \(error.localizedDescription)")
     }
 }
 
-// MARK: - Read (GET single document)
-func get_document(rowId: String) async {
-    do {
-        let document = try await appwrite.table.getRow(
-            databaseId: databaseID,
-            tableId: tableID,
-            rowId: rowId
-        )
-        print("Document \(rowId): \(document)")
-    } catch {
-        print("Error fetching document \(rowId): \(error.localizedDescription)")
-    }
-}
 
-// MARK: - Update (PUT)
+/// Updates the user's first document with a new list of equations.
+/// If no document exists, it calls `post_to_database` to create one.
 func update_document_for_user(equations: [String]) async {
+    // Ensure we have a document ID to update.
     guard let docIdToUpdate = userTableIDs.first else {
-        print("No existing document found. Creating one instead.")
+        print("Update failed: No document ID found for the user. Attempting to create one.")
+        // If no document exists, we should create one instead.
         await post_to_database(equations: equations)
         return
     }
     
+    print("Updating document: \(docIdToUpdate)...")
     do {
-        let updated = try await appwrite.table.updateRow(
+        _ = try await appwrite.table.updateRow(
             databaseId: databaseID,
             tableId: tableID,
             rowId: docIdToUpdate,
@@ -83,11 +86,9 @@ func update_document_for_user(equations: [String]) async {
                 "userid": deviceID,
                 "equations": equations
             ],
-            permissions: [
-                Permission.read(Role.any()) // optional: make public readable
-            ]
+            permissions: [Permission.read(Role.any())]
         )
-        print("Document updated: \(updated.id)")
+        print("Document updated successfully.")
     } catch {
         print("Error updating document: \(error.localizedDescription)")
     }
@@ -120,7 +121,7 @@ func toggle_share(rowId: String, share: Bool) async {
         )
         print(share ? " Constellation shared: \(updated.id)" : "Constellation unshared: \(updated.id)")
     } catch {
-        print("❌ Error toggling share state: \(error.localizedDescription)")
+        print("Error toggling share state: \(error.localizedDescription)")
     }
 }
 
