@@ -7,7 +7,6 @@ import AppwriteModels
 let deviceID = UIDevice.current.identifierForVendor?.uuidString ?? "unknown_device"
 let databaseID = "69114f5e001d9116992a"
 let tableID = "constellation"
-let deviceID = UIDevice.current.identifierForVendor?.uuidString ?? "unknown-device"
 
 // This array will store the unique ID(s) of the user's document(s).
 var userTableIDs: [String] = []

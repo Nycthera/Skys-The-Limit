@@ -1,12 +1,12 @@
 import SwiftUI
-import SwiftMath // <-- This was the missing import
+import SwiftMath
 
 struct ConstellationView: View {
     @EnvironmentObject var equationStore: EquationStore
 
     var body: some View {
         ZStack {
-            Image("Space")
+            Image("background")
                 .resizable()
                 .aspectRatio(contentMode: .fill)
                 .edgesIgnoringSafeArea(.all)
@@ -32,8 +32,19 @@ struct ConstellationView: View {
             }
             .navigationTitle("My Galaxy")
             .onAppear {
-                equationStore.fetchEquations()
+                // This is the corrected block of code.
+                // We wrap the async call in a Task.
+                Task {
+                    await equationStore.fetchEquations()
+                }
             }
         }
+    }
+}
+
+#Preview {
+    NavigationView {
+        ConstellationView()
+            .environmentObject(EquationStore())
     }
 }

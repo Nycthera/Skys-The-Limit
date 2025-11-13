@@ -63,7 +63,9 @@ struct MathKeyboardView: View {
             MathKey(display: "x²", latex: "^{2}", type: .character),
             MathKey(display: "√", latex: "\\sqrt{}", type: .character),
             MathKey(display: "⌫", latex: "", type: .backspace),
-            MathKey(display: "=", latex: "=", type: .character)
+            MathKey(display: "=", latex: "=", type: .character),
+            MathKey(display: "+", latex: "+", type: .character),
+            MathKey(display: "-", latex: "-", type: .character)
         ]
     ]
 

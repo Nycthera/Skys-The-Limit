@@ -1,47 +1,76 @@
-//
-//  GraphCanvasView.swift
-//  Skys The Limit
-//
-//  Created by Nhavin Thirukkumaran on 7/11/25.
-//
-
 import SwiftUI
-import SwiftMath
-import Foundation // Ns expression lives in here
 
-private func calculatePoints(for expressionString: String, size: CGSize) -> [CGPoint] {
-    var points: [CGPoint] = []
+struct GraphCanvasView: View {
+    // All the data needed to draw the game state
+    let stars: [CGPoint]
+    let successfulLines: [[(x: Double, y: Double)]]
+    let currentLine: [(x: Double, y: Double)]
+    let currentTargetIndex: Int
+
+    private let xRange: ClosedRange<Double> = -10...10
+    private let yRange: ClosedRange<Double> = -10...10
     
-    // 1. Create the NSExpression object from the user's string.
-    // Note: It doesn't handle implicit multiplication like "2x", you need "2*x".
-    // It also doesn't use "^" for power, it uses "**".
- 
-    let expression = NSExpression(format: expressionString)
-    
-    let xMin: Double = -10
-    let xMax: Double = 10
-    
-    for screenX in 0...Int(size.width) {
-        let mathX = xMin + (Double(screenX) / size.width) * (xMax - xMin)
-        
-        // 2. Create a dictionary to substitute our 'x' variable.
-        let context: [String: Any] = ["x": mathX]
-        
-        // 3. Evaluate the expression.
-        // We need to check if the result is a valid number.
-        if let result = expression.expressionValue(with: nil, context: context as? NSMutableDictionary) as? Double {
-            let mathY = result
+    var body: some View {
+        Canvas { context, size in
+            let xScale = size.width / CGFloat(xRange.upperBound - xRange.lowerBound)
+            let yScale = size.height / CGFloat(yRange.upperBound - yRange.lowerBound)
             
-            // Translate mathY to screenY...
-            let screenY = size.height - (CGFloat(mathY) * (size.height / 20))
-            points.append(CGPoint(x: CGFloat(screenX), y: screenY))
+            context.translateBy(x: size.width / 2, y: size.height / 2)
+
+            // Layer 1: Draw Axes
+            var axes = Path()
+            axes.move(to: CGPoint(x: -size.width / 2, y: 0))
+            axes.addLine(to: CGPoint(x: size.width / 2, y: 0))
+            axes.move(to: CGPoint(x: 0, y: -size.height / 2))
+            axes.addLine(to: CGPoint(x: 0, y: size.height / 2))
+            context.stroke(axes, with: .color(.gray.opacity(0.4)), lineWidth: 1)
+            
+            // Layer 2: Draw successfully completed lines
+            for line in successfulLines {
+                if line.isEmpty { continue }
+                var path = Path()
+                path.move(to: scale(point: line.first!, xScale: xScale, yScale: yScale))
+                for point in line.dropFirst() {
+                    path.addLine(to: scale(point: point, xScale: xScale, yScale: yScale))
+                }
+                context.stroke(path, with: .color(.cyan), style: StrokeStyle(lineWidth: 3, lineCap: .round))
+            }
+            
+            // Layer 3: Draw the user's current, live-preview line
+            if !currentLine.isEmpty {
+                var path = Path()
+                path.move(to: scale(point: currentLine.first!, xScale: xScale, yScale: yScale))
+                for point in currentLine.dropFirst() {
+                    path.addLine(to: scale(point: point, xScale: xScale, yScale: yScale))
+                }
+                context.stroke(path, with: .color(.white.opacity(0.5)), style: StrokeStyle(lineWidth: 2, lineCap: .round, dash: [5]))
+            }
+            
+            // Layer 4: Draw all stars and highlight the current targets
+            for (index, star) in stars.enumerated() {
+                let screenPoint = scale(point: star, xScale: xScale, yScale: yScale)
+                let rect = CGRect(x: screenPoint.x - 5, y: screenPoint.y - 5, width: 10, height: 10)
+                
+                // Highlight the two target stars
+                if index == currentTargetIndex || index == currentTargetIndex + 1 {
+                    let highlightRect = CGRect(x: screenPoint.x - 10, y: screenPoint.y - 10, width: 20, height: 20)
+                    context.stroke(Path(ellipseIn: highlightRect), with: .color(.yellow.opacity(0.8)), lineWidth: 2)
+                    context.fill(Path(ellipseIn: rect), with: .color(.yellow))
+                } else {
+                    context.fill(Path(ellipseIn: rect), with: .color(.white.opacity(0.7)))
+                }
+            }
         }
+        .background(Color.black.opacity(0.5))
+        .cornerRadius(12)
     }
     
-    return points
+    // Helper to convert math coordinates to screen coordinates
+    private func scale(point: (x: Double, y: Double), xScale: CGFloat, yScale: CGFloat) -> CGPoint {
+        return CGPoint(x: CGFloat(point.x) * xScale, y: -CGFloat(point.y) * yScale)
+    }
+    
+    private func scale(point: CGPoint, xScale: CGFloat, yScale: CGFloat) -> CGPoint {
+        return CGPoint(x: point.x * xScale, y: -point.y * yScale)
+    }
 }
-
-
-
-
-
