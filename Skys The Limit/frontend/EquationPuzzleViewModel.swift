@@ -1,25 +1,19 @@
-//
-//  EquationPuzzleViewModel.swift
-//  Skys The Limit
-//
-//  Created by Nhavin Thirukkumaran on 13/11/25.
-//
-
 import Foundation
 import CoreGraphics
 import Combine
 
 @MainActor
 class EquationPuzzleViewModel: ObservableObject {
-    // The puzzle state
+    // --- Puzzle State ---
     @Published var stars: [CGPoint] = []
     @Published var successfulLines: [[(x: Double, y: Double)]] = []
+    @Published var successfulEquations: [String] = [] // THIS IS THE MISSING LINE
     
-    // The current user input state
+    // --- User Input State ---
     @Published var currentLatexString: String = "y="
     @Published var currentGraphPoints: [(x: Double, y: Double)] = []
     
-    // The game flow state
+    // --- Game Flow State ---
     @Published var currentTargetIndex: Int = 0
     @Published var isPuzzleComplete: Bool = false
     @Published var feedbackMessage: String = ""
@@ -28,15 +22,14 @@ class EquationPuzzleViewModel: ObservableObject {
         generateNewPuzzle()
     }
     
-    /// Generates a new set of random stars and resets the game state.
     func generateNewPuzzle(starCount: Int = 4) {
         stars.removeAll()
         successfulLines.removeAll()
+        successfulEquations.removeAll() // Clear the new array
         currentTargetIndex = 0
         isPuzzleComplete = false
         resetCurrentLine()
         
-        // Generate unique, non-overlapping integer coordinates for stars.
         var usedPoints = Set<CGPoint>()
         for _ in 0..<starCount {
             var newPoint: CGPoint
@@ -48,26 +41,26 @@ class EquationPuzzleViewModel: ObservableObject {
         }
     }
     
-    /// Updates the live preview of the user's current equation.
     func updateUserGraph() {
         let engine = MathEngine(equation: currentLatexString)
-        self.currentGraphPoints = engine.calculatePoints() ?? []
+        self.currentGraphPoints = engine.calculatePoints()
     }
     
-    /// Checks if the user's current line correctly connects the two target stars.
     func checkCurrentLineSolution() {
         guard stars.count > currentTargetIndex + 1 else { return }
         
         let starA = stars[currentTargetIndex]
         let starB = stars[currentTargetIndex + 1]
-        
-        let tolerance = 0.5 // How close the line must be to the star's center.
+        let tolerance = 0.5
         
         let connectsStarA = lineContainsPoint(line: currentGraphPoints, point: starA, tolerance: tolerance)
         let connectsStarB = lineContainsPoint(line: currentGraphPoints, point: starB, tolerance: tolerance)
         
         if connectsStarA && connectsStarB {
+            // Save both the points and the equation string
             successfulLines.append(currentGraphPoints)
+            successfulEquations.append(currentLatexString) // Save the successful equation
+            
             currentTargetIndex += 1
             
             if currentTargetIndex >= stars.count - 1 {
