@@ -37,7 +37,7 @@ struct EquationListView: View {
                 .background(Color.black.opacity(0.4))
                 .cornerRadius(15)
                 // --- FIX 1: Give the left column a fixed width ---
-                .frame(width: 300)
+                // .frame(width: 300)
 
                 // --- RIGHT COLUMN: Interactive Area ---
                 VStack(spacing: 15) {
@@ -65,7 +65,7 @@ struct EquationListView: View {
                         .cornerRadius(12)
 
                     MathKeyboardView(latexString: $viewModel.currentLatexString)
-                        .frame(height: 240) // The keyboard has a fixed height
+                      //  .frame(height: 240) // The keyboard has a fixed height
                     
                     Button("Check Line") {
                         viewModel.checkCurrentLineSolution()

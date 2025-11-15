@@ -70,29 +70,34 @@ struct MathKeyboardView: View {
     ]
 
     var body: some View {
-        VStack(spacing: 10) {
-            // Loop through each row in our layout
-            ForEach(keyboardLayout, id: \.first!.id) { row in
-                HStack(spacing: 10) {
-                    // Loop through each key in the current row
-                    ForEach(row) { key in
-                        Button {
-                            // When a key is pressed, call our handler function
-                            handleKeyPress(key)
-                        } label: {
-                            Text(key.display)
-                                .font(.system(size: 22, weight: .medium))
-                                .frame(maxWidth: .infinity)
-                                .frame(height: 55)
-                                .background(key.type == .backspace ? Color.red.opacity(0.7) : Color.gray.opacity(0.25))
-                                .foregroundColor(.primary)
-                                .cornerRadius(8)
+            VStack(spacing: 10) {
+                ForEach(keyboardLayout, id: \.first!.id) { row in
+                    HStack(spacing: 5) {
+                        ForEach(row) { key in
+                            Button {
+                                handleKeyPress(key)
+                            } label: {
+                                Text(key.display)
+                                    .font(.system(size: 20, weight: .medium))
+                                    .frame(maxWidth: .infinity)
+                                    .frame(height: 50)
+                                    .background(
+                                        key.type == .backspace
+                                            ? Color.red.opacity(0.7)
+                                            : Color.gray.opacity(0.25)
+                                    )
+                                    .cornerRadius(8)
+                            }
                         }
                     }
                 }
             }
+            .padding(.horizontal, 10)
+            .padding(.bottom, 10)
+            .background(Color.black.opacity(0.3))
+            .cornerRadius(15)
+            .frame(height: 240)      // << FIXED HEIGHT
         }
-    }
 
    
     private func handleKeyPress(_ key: MathKey) {
