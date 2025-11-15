@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		D0F1B6D42EC1E59C0002B463 /* Skys-The-Limit-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = D0F1B6D32EC1E59C0002B463 /* Skys-The-Limit-Info.plist */; };
 		D98DCA1C2EC179F8003B9097 /* SwiftMath in Frameworks */ = {isa = PBXBuildFile; productRef = D98DCA1B2EC179F8003B9097 /* SwiftMath */; };
 		D9B57B882EC0815200D92C59 /* Appwrite in Frameworks */ = {isa = PBXBuildFile; productRef = D9B57B872EC0815200D92C59 /* Appwrite */; };
 /* End PBXBuildFile section */
@@ -117,7 +116,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				D0F1B6D42EC1E59C0002B463 /* Skys-The-Limit-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
