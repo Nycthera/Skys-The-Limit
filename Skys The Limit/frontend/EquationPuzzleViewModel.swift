@@ -43,7 +43,6 @@ class EquationPuzzleViewModel: ObservableObject {
     /// Updates the live preview of the user's current equation.
     func updateUserGraph() {
         let engine = MathEngine(equation: currentLatexString)
-        self.currentGraphPoints = engine.calculatePoints()
     }
     
     /// Checks if the user's current line correctly connects the two target stars.

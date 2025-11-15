@@ -7,112 +7,110 @@
 
 import SwiftUI
 
-
-
-// An enum to define the behavior of a key
+// MARK: - Key Types
 enum KeyType {
     case character
     case backspace
 }
 
-// A struct to represent a single, identifiable key on our keyboard
+// MARK: - Math Key
 struct MathKey: Identifiable {
     let id = UUID()
-    let display: String   // What the user sees on the button (e.g., "√")
-    let latex: String     // The LaTeX string to insert (e.g., "\\sqrt{}")
+    let display: String   // What the user sees on the button (LaTeX or symbol)
+    let mathValue: String // Safe string for MathEngine evaluation
     let type: KeyType
 }
 
-
-
-// This view is the keyboard itself. It is designed to be a reusable component.
+// MARK: - Keyboard View
 struct MathKeyboardView: View {
-    // This binding allows the keyboard to modify a String that lives in a different view.
-    // This is how the keyboard communicates its changes back to the main screen.
+    // Displayed LaTeX string (UI)
     @Binding var latexString: String
+    // Safe math string (for NSExpression / MathEngine)
+    @Binding var mathString: String
 
-    
+    // Keyboard layout
     let keyboardLayout: [[MathKey]] = [
-        // Row 1: Numbers and Parentheses
         [
-            MathKey(display: "1", latex: "1", type: .character),
-            MathKey(display: "2", latex: "2", type: .character),
-            MathKey(display: "3", latex: "3", type: .character),
-            MathKey(display: "(", latex: "(", type: .character),
-            MathKey(display: ")", latex: ")", type: .character)
+            MathKey(display: "1", mathValue: "1", type: .character),
+            MathKey(display: "2", mathValue: "2", type: .character),
+            MathKey(display: "3", mathValue: "3", type: .character),
+            MathKey(display: "(", mathValue: "(", type: .character),
+            MathKey(display: ")", mathValue: ")", type: .character)
         ],
-        // Row 2: More Numbers and Variables
         [
-            MathKey(display: "4", latex: "4", type: .character),
-            MathKey(display: "5", latex: "5", type: .character),
-            MathKey(display: "6", latex: "6", type: .character),
-            MathKey(display: "x", latex: "x", type: .character),
-            MathKey(display: "y", latex: "y", type: .character)
+            MathKey(display: "4", mathValue: "4", type: .character),
+            MathKey(display: "5", mathValue: "5", type: .character),
+            MathKey(display: "6", mathValue: "6", type: .character),
+            MathKey(display: "x", mathValue: "x", type: .character),
+            MathKey(display: "y", mathValue: "y", type: .character)
         ],
-        // Row 3: Final Numbers and Comma
         [
-            MathKey(display: "7", latex: "7", type: .character),
-            MathKey(display: "8", latex: "8", type: .character),
-            MathKey(display: "9", latex: "9", type: .character),
-            MathKey(display: "0", latex: "0", type: .character),
-            MathKey(display: ",", latex: ",", type: .character)
+            MathKey(display: "7", mathValue: "7", type: .character),
+            MathKey(display: "8", mathValue: "8", type: .character),
+            MathKey(display: "9", mathValue: "9", type: .character),
+            MathKey(display: "0", mathValue: "0", type: .character),
+            MathKey(display: ",", mathValue: ",", type: .character)
         ],
-        // Row 4: Functions and Backspace
         [
-            MathKey(display: "a/b", latex: "\\frac{}{}", type: .character),
-            MathKey(display: "x²", latex: "^{2}", type: .character),
-            MathKey(display: "√", latex: "\\sqrt{}", type: .character),
-            MathKey(display: "⌫", latex: "", type: .backspace),
-            MathKey(display: "=", latex: "=", type: .character),
-            MathKey(display: "+", latex: "+", type: .character),
-            MathKey(display: "-", latex: "-", type: .character)
+            MathKey(display: "a/b", mathValue: "(", type: .character),  // placeholder for display
+            MathKey(display: "x²", mathValue: "^2", type: .character),
+            MathKey(display: "√", mathValue: "sqrt(", type: .character),
+            MathKey(display: "⌫", mathValue: "", type: .backspace),
+            MathKey(display: "=", mathValue: "=", type: .character),
+            MathKey(display: "+", mathValue: "+", type: .character),
+            MathKey(display: "-", mathValue: "-", type: .character)
         ]
     ]
 
     var body: some View {
-            VStack(spacing: 10) {
-                ForEach(keyboardLayout, id: \.first!.id) { row in
-                    HStack(spacing: 5) {
-                        ForEach(row) { key in
-                            Button {
-                                handleKeyPress(key)
-                            } label: {
-                                Text(key.display)
-                                    .font(.system(size: 20, weight: .medium))
-                                    .frame(maxWidth: .infinity)
-                                    .frame(height: 50)
-                                    .background(
-                                        key.type == .backspace
-                                            ? Color.red.opacity(0.7)
-                                            : Color.gray.opacity(0.25)
-                                    )
-                                    .cornerRadius(8)
-                            }
+        VStack(spacing: 10) {
+            ForEach(keyboardLayout, id: \.first!.id) { row in
+                HStack(spacing: 5) {
+                    ForEach(row) { key in
+                        Button {
+                            handleKeyPress(key)
+                        } label: {
+                            Text(key.display)
+                                .font(.system(size: 20, weight: .medium))
+                                .frame(maxWidth: .infinity)
+                                .frame(height: 50)
+                                .background(
+                                    key.type == .backspace
+                                        ? Color.red.opacity(0.7)
+                                        : Color.gray.opacity(0.25)
+                                )
+                                .cornerRadius(8)
                         }
                     }
                 }
             }
-            .padding(.horizontal, 10)
-            .padding(.bottom, 10)
-            .background(Color.black.opacity(0.3))
-            .cornerRadius(15)
-            .frame(height: 240)      // << FIXED HEIGHT
         }
+        .padding(.horizontal, 10)
+        .padding(.bottom, 10)
+        .background(Color.black.opacity(0.3))
+        .cornerRadius(15)
+        .frame(height: 240)
+    }
 
-   
+    // MARK: - Key Handling
     private func handleKeyPress(_ key: MathKey) {
         switch key.type {
         case .character:
-            // If it's a normal character, just append its LaTeX string
-            latexString += key.latex
+            // Append display for LaTeX
+            latexString += key.display
             
+            // Append safe math string for evaluation
+            mathString += key.mathValue
+
         case .backspace:
-            // If it's a backspace, remove the last character, but only if the string isn't empty
+            // Remove last character from LaTeX display
             if !latexString.isEmpty {
                 latexString.removeLast()
+            }
+            // Remove last character from math string safely
+            if !mathString.isEmpty {
+                mathString.removeLast()
             }
         }
     }
 }
-
-

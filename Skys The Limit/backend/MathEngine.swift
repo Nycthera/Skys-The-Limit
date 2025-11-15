@@ -21,34 +21,19 @@ final class MathEngine {
 
     // Raw equation string from user
     var equation: String
-    
+
     // Default numeric values for symbolic coefficients
     var coefficients: [String: Double] = [
         "a": 1, "b": 1, "c": 1,
         "m": 1, "n": 1
     ]
 
-    // Characters or patterns that can cause NSExpression(format:) to throw Obj-C exceptions
+    // Characters that crash NSExpression
     private let disallowedExpressionCharacters = CharacterSet(charactersIn: "\"|")
 
-    // Ensure the expression is safe for NSExpression. Returns nil if unsafe.
-    private func makeSafeExpressionString(_ input: String) -> String? {
-        // Reject if any disallowed characters are present
-        if input.rangeOfCharacter(from: disallowedExpressionCharacters) != nil {
-            return nil
-        }
-        // Reject if there is any '=' remaining (we only evaluate RHS of y=...)
-        if input.contains("=") { return nil }
-
-        // Basic sanity: must contain only allowed tokens for math evaluation
-        // (same as isValid, but without '=')
-        let validPattern = "^[0-9a-zA-Z\\^\\+\\-\\*\\/\\(\\)\\.]+$"
-        if input.range(of: validPattern, options: .regularExpression) == nil {
-            return nil
-        }
-        return input
-    }
-
+    // ------------------------------------------------------------
+    // MARK: - Init
+    // ------------------------------------------------------------
     init(equation: String) {
         self.equation = equation.replacingOccurrences(of: " ", with: "")
     }
@@ -81,78 +66,94 @@ final class MathEngine {
         return .unknown
     }
 
-    // Remove "y=" at start
+    // Strip leading "y=" or "f(x)="
     private func strippedEquation() -> String {
-        equation.replacingOccurrences(of: #"^[a-zA-Z]\s*="#,
-                                      with: "",
-                                      options: .regularExpression)
+        equation.replacingOccurrences(
+            of: #"^[a-zA-Z]\s*="#,
+            with: "",
+            options: .regularExpression
+        )
     }
 
     // ------------------------------------------------------------
-    // MARK: - Validate equation
+    // MARK: - Validate Format
     // ------------------------------------------------------------
     func isValid() -> Bool {
-        // Allowed characters
         let validPattern = #"^[0-9a-zA-Z\^\+\-\*\/\(\)\.\=]+$"#
         return equation.range(of: validPattern, options: .regularExpression) != nil
     }
 
     // ------------------------------------------------------------
-    // MARK: - Preprocess (replace coefficients, handle ^, fix multiplication)
+    // MARK: - Safe Expression Check
+    // ------------------------------------------------------------
+    private func makeSafeExpressionString(_ input: String) -> String? {
+
+        // Reject comparison operators (NSExpression will crash)
+        if input.contains("==") || input.contains(">=") || input.contains("<=")
+            || input.contains("!=") || input.contains(">") || input.contains("<") {
+            return nil
+        }
+
+        // Reject any accidental "=" left over
+        if input.contains("=") { return nil }
+
+        // Reject unsafe characters (quotes, pipes)
+        if input.rangeOfCharacter(from: disallowedExpressionCharacters) != nil {
+            return nil
+        }
+
+        // Only allow math-safe characters
+        let validPattern = #"^[0-9a-zA-Z\^\+\-\*\/\(\)\.]+$"#
+        guard input.range(of: validPattern, options: .regularExpression) != nil else {
+            return nil
+        }
+
+        return input
+    }
+
+    // ------------------------------------------------------------
+    // MARK: - Preprocess Equation
     // ------------------------------------------------------------
     private func preprocessEquation() -> String {
         var eq = strippedEquation()
 
-        // If user entered an equality accidentally like "x+1==1" or additional parts, keep only the leftmost segment before '='
-        if let eqIndex = eq.firstIndex(of: "=") {
-            eq = String(eq[..<eqIndex])
+        // Remove any accidental RHS if user typed full equation (x+1=3)
+        if let idx = eq.firstIndex(of: "=") {
+            eq = String(eq[..<idx])
         }
 
-        // Strip any stray double quotes or pipes proactively to avoid NSExpression crashes
-        eq.removeAll { ch in
-            ch == "\"" || ch == "|" }
+        // Remove harmful characters
+        eq.removeAll { $0 == "\"" || $0 == "|" }
 
-        // ---- Replace coefficients a,b,c,m,n safely ----
+        // Replace coefficients a,b,c etc
         for (symbol, value) in coefficients {
-            // Only replace standalone a, b, c (NOT inside sin/tan/log)
             let pattern = "(?<![a-zA-Z])\(symbol)(?![a-zA-Z])"
-            eq = eq.replacingOccurrences(
-                of: pattern,
-                with: "(\(value))",
-                options: .regularExpression
-            )
+            eq = eq.replacingOccurrences(of: pattern,
+                                         with: "(\(value))",
+                                         options: .regularExpression)
         }
 
-        // ---- Convert ^ into pow() ----
-        // Match x^2, (x+1)^3, 2^x etc.
+        // Convert ^ → pow()
         let powerPattern = #"([a-zA-Z0-9\)\(]+)\^([a-zA-Z0-9\)\(]+)"#
         let regex = try! NSRegularExpression(pattern: powerPattern)
 
         while let match = regex.firstMatch(in: eq, range: NSRange(eq.startIndex..., in: eq)) {
-            let baseRange = Range(match.range(at: 1), in: eq)!
-            let expRange = Range(match.range(at: 2), in: eq)!
+            let base = Range(match.range(at: 1), in: eq)!
+            let exp  = Range(match.range(at: 2), in: eq)!
 
-            let base = eq[baseRange]
-            let exp  = eq[expRange]
-            let replacement = "pow(\(base),\(exp))"
-
-            let fullRange = baseRange.lowerBound..<expRange.upperBound
-            eq.replaceSubrange(fullRange, with: replacement)
+            let replacement = "pow(\(eq[base]),\(eq[exp]))"
+            eq.replaceSubrange(base.lowerBound..<exp.upperBound, with: replacement)
         }
 
-        // ---- 2x → 2*x, (1)x → (1)*x ----
-        eq = eq.replacingOccurrences(
-            of: #"([0-9\)])x"#,
-            with: "$1*x",
-            options: .regularExpression
-        )
+        // 2x -> 2*x
+        eq = eq.replacingOccurrences(of: #"([0-9\)])x"#,
+                                     with: "$1*x",
+                                     options: .regularExpression)
 
-        // ---- x( → x*( ----
-        eq = eq.replacingOccurrences(
-            of: #"x\("#,
-            with: "x*(",
-            options: .regularExpression
-        )
+        // x( -> x*(
+        eq = eq.replacingOccurrences(of: #"x\("#,
+                                     with: "x*(",
+                                     options: .regularExpression)
 
         return eq
     }
@@ -164,24 +165,24 @@ final class MathEngine {
         xRange: ClosedRange<Double> = -10...10,
         step: Double = 1.0
     ) -> [(x: Double, y: Double)] {
-        
+
         var result: [(x: Double, y: Double)] = []
         let processed = preprocessEquation()
 
         for x in stride(from: xRange.lowerBound, through: xRange.upperBound, by: step) {
+
             let exprString = processed.replacingOccurrences(of: "x", with: "(\(x))")
 
-            // Debug print (super useful)
-            print("EXPR:", exprString)
-
-            // Build a safe expression string before constructing NSExpression (which crashes on bad formats)
+            // Safety: reject any accidental comparison operator
             guard let safeExpr = makeSafeExpressionString(exprString) else {
-                // Skip this x if the expression would be unsafe
+                print("Skipping unsafe expression:", exprString)
                 continue
             }
 
             let expr = NSExpression(format: safeExpr)
-            if let y = expr.expressionValue(with: nil, context: nil) as? Double, y.isFinite {
+
+            if let y = expr.expressionValue(with: nil, context: nil) as? Double,
+               y.isFinite {
                 result.append((x, y))
             }
         }
@@ -190,7 +191,7 @@ final class MathEngine {
     }
 
     // ------------------------------------------------------------
-    // MARK: - Evaluate equation
+    // MARK: - Public Evaluate
     // ------------------------------------------------------------
     func evaluate() -> [(x: Double, y: Double)]? {
         guard isValid() else {
@@ -204,4 +205,3 @@ final class MathEngine {
         return calculatePoints()
     }
 }
-

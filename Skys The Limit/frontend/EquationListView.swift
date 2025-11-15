@@ -3,7 +3,11 @@ import SwiftMath
 
 struct EquationListView: View {
     @StateObject private var viewModel = EquationPuzzleViewModel()
+    @EnvironmentObject var equationStore: EquationStore
     
+    // Safe math string for evaluation (bind to MathKeyboardView)
+    @State private var currentMathString: String = ""
+
     var body: some View {
         ZStack {
             Image("Space")
@@ -12,11 +16,9 @@ struct EquationListView: View {
                 .edgesIgnoringSafeArea(.all)
             
             GeometryReader { geometry in
-                HStack(spacing: 12) {
-                    
-                    // =============================
-                    // LEFT COLUMN: Equations List
-                    // =============================
+                
+                HStack(spacing: 15) {
+                    // --- LEFT COLUMN: Equations List ---
                     VStack(spacing: 10) {
                         Text("Equations")
                             .font(.custom("SpaceMono-Bold", size: 24))
@@ -25,7 +27,9 @@ struct EquationListView: View {
                         ScrollView {
                             VStack(alignment: .leading, spacing: 8) {
                                 ForEach(viewModel.successfulEquations, id: \.self) { equation in
-                                    MathView(equation: equation, textAlignment: .left, fontSize: 22)
+                                    MathView(equation: equation,
+                                             textAlignment: .left,
+                                             fontSize: 22)
                                         .padding(10)
                                         .frame(maxWidth: .infinity)
                                         .background(Color.white.opacity(0.1))
@@ -38,16 +42,13 @@ struct EquationListView: View {
                     .padding()
                     .background(Color.black.opacity(0.4))
                     .cornerRadius(15)
-                    .frame(width: 300)
+                    .frame(width: geometry.size.width * 0.35) // Fixed width for left column
                     
-                    // =============================
-                    // RIGHT COLUMN: Interactive
-                    // =============================
+                    // --- RIGHT COLUMN: Interactive Area ---
                     VStack(spacing: 15) {
                         
                         if !viewModel.isPuzzleComplete &&
                             viewModel.stars.count > viewModel.currentTargetIndex + 1 {
-                            
                             Text("Connect Star \(viewModel.currentTargetIndex + 1) to Star \(viewModel.currentTargetIndex + 2)")
                                 .font(.custom("SpaceMono-Regular", size: 20))
                                 .foregroundColor(.yellow)
@@ -62,15 +63,22 @@ struct EquationListView: View {
                         )
                         .frame(height: geometry.size.height * 0.40)
                         
-                        MathView(equation: viewModel.currentLatexString, fontSize: 22)
+                        MathView(equation: viewModel.currentLatexString,
+                                 fontSize: 22)
                             .frame(maxWidth: .infinity, minHeight: 60, maxHeight: 80)
                             .background(Color.black.opacity(0.5))
                             .cornerRadius(12)
                         
-                        MathKeyboardView(latexString: $viewModel.currentLatexString)
+                        // --- Updated MathKeyboardView ---
+                        MathKeyboardView(
+                            latexString: $viewModel.currentLatexString, mathString: $currentMathString
+                        )
                         
                         Button("Check Line") {
+                            // TODO: Initialize MathEngine with a proper equation string, not the store
+                            // Use currentMathString for evaluation
                             viewModel.checkCurrentLineSolution()
+                            
                         }
                         .font(.custom("SpaceMono-Regular", size: 20))
                         .padding(.vertical, 15)
@@ -78,34 +86,29 @@ struct EquationListView: View {
                         .background(Color.white)
                         .foregroundColor(.black)
                         .cornerRadius(15)
+                        .disabled(viewModel.isPuzzleComplete)
+                        
+                        Spacer()
                     }
-                    .frame(maxWidth: .infinity)
-                    .background(Color.white)
-                    .foregroundColor(.black)
-                    .cornerRadius(15)
-                    .disabled(viewModel.isPuzzleComplete)
+                    .padding()
                 }
             }
             
-            // =============================
-            // WIN OVERLAY (stays inside ZStack!)
-            // =============================
+            // "You Win!" overlay
             if viewModel.isPuzzleComplete {
                 VStack {
-                    Text("You Win!")
-                        .font(.largeTitle)
-                        .padding()
-                        .background(Color.white.opacity(0.9))
-                        .cornerRadius(12)
+                    Text("🎉 You Win! 🎉")
+                        .font(.custom("SpaceMono-Bold", size: 36))
+                        .foregroundColor(.yellow)
+                        .shadow(radius: 5)
                 }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .background(Color.black.opacity(0.7))
             }
         }
-        // =============================
-        // THESE MODIFIERS APPLY TO ZSTACK
-        // =============================
         .animation(.default, value: viewModel.isPuzzleComplete)
         .animation(.default, value: viewModel.currentTargetIndex)
-        .onChange(of: viewModel.currentLatexString) {
+        .onChange(of: viewModel.currentLatexString) { _ in
             viewModel.updateUserGraph()
         }
         .navigationTitle("Draw The Stars")
@@ -114,4 +117,3 @@ struct EquationListView: View {
         .navigationBarBackButtonHidden(false)
     }
 }
-
