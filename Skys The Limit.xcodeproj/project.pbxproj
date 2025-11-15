@@ -12,8 +12,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		D0F1B6D32EC1E59C0002B463 /* Skys-The-Limit-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "Skys-The-Limit-Info.plist"; sourceTree = "<group>"; };
-		D98DCA392EC1D96F003B9097 /* Skys The Limit.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Skys The Limit.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		D9B57B6B2EC0805B00D92C59 /* Skys The Limit.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Skys The Limit.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -41,9 +40,16 @@
 			isa = PBXGroup;
 			children = (
 				D9B57B6D2EC0805B00D92C59 /* Skys The Limit */,
-				D98DCA392EC1D96F003B9097 /* Skys The Limit.app */,
-				D0F1B6D32EC1E59C0002B463 /* Skys-The-Limit-Info.plist */,
+				D9B57B6C2EC0805B00D92C59 /* Products */,
 			);
+			sourceTree = "<group>";
+		};
+		D9B57B6C2EC0805B00D92C59 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				D9B57B6B2EC0805B00D92C59 /* Skys The Limit.app */,
+			);
+			name = Products;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -70,7 +76,7 @@
 				D98DCA1B2EC179F8003B9097 /* SwiftMath */,
 			);
 			productName = "Skys The Limit";
-			productReference = D98DCA392EC1D96F003B9097 /* Skys The Limit.app */;
+			productReference = D9B57B6B2EC0805B00D92C59 /* Skys The Limit.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -102,7 +108,7 @@
 				D98DCA1A2EC179F8003B9097 /* XCRemoteSwiftPackageReference "SwiftMath" */,
 			);
 			preferredProjectObjectVersion = 77;
-			productRefGroup = D9B57B622EC0805B00D92C59;
+			productRefGroup = D9B57B6C2EC0805B00D92C59 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
@@ -263,7 +269,6 @@
 				DEVELOPMENT_TEAM = 4PP5ZD3GV5;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = "Skys-The-Limit-Info.plist";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -297,7 +302,6 @@
 				DEVELOPMENT_TEAM = 4PP5ZD3GV5;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = "Skys-The-Limit-Info.plist";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;

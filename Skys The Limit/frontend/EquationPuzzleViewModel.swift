@@ -7,6 +7,7 @@ class EquationPuzzleViewModel: ObservableObject {
     // The puzzle state
     @Published var stars: [CGPoint] = []
     @Published var successfulLines: [[(x: Double, y: Double)]] = []
+    @Published var successfulEquations: [String] = []
     
     // The current user input state
     @Published var currentLatexString: String = "y="
@@ -58,6 +59,7 @@ class EquationPuzzleViewModel: ObservableObject {
         
         if connectsStarA && connectsStarB {
             successfulLines.append(currentGraphPoints)
+            successfulEquations.append(currentLatexString)
             currentTargetIndex += 1
             
             if currentTargetIndex >= stars.count - 1 {
