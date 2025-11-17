@@ -31,7 +31,7 @@ struct MainMenuView: View {
 
                     NavigationLink("Draw The Stars", destination: EquationListView())
                     NavigationLink("My Galaxy", destination: ConstellationView())
-                    NavigationLink("Turtitoal", destination: TutorialLevelOneView())
+//                    NavigationLink("Turtitoal", destination: TutorialLevelOneView())
                     // FIXED
                     NavigationLink(
                         "Tutorial",
