@@ -1,6 +1,8 @@
 import SwiftUI
 
 struct MainMenuView: View {
+    @State private var isShowingTutorial = false   // <─ ADD THIS
+
     var body: some View {
         ZStack {
             Image("Space")
@@ -23,13 +25,15 @@ struct MainMenuView: View {
                 Spacer()
 
                 VStack(alignment: .leading, spacing: 40) {
-                    // This is now the main puzzle game.
+
                     NavigationLink("Draw The Stars", destination: EquationListView())
-                    
-                    // This can link to a list of saved creations.
                     NavigationLink("My Galaxy", destination: ConstellationView())
-                    // In your MainMenuView.swift
-                    NavigationLink("Tutorial", destination: TutorialLevelOneView(isShowingTutorial: ))
+                    NavigationLink("Turtitoal", destination: TutorialLevelOneView())
+                    // FIXED
+                    NavigationLink(
+                        "Tutorial",
+                        destination: TutorialLevelOneView(isShowingTutorial: $isShowingTutorial)
+                    )
                 }
                 .font(.custom("SpaceMono-Regular", size: 35))
                 .foregroundColor(.white)

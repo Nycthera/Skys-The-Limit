@@ -19,6 +19,7 @@ struct TutorialLevelOneView: View {
                     VideoPlayer(player: AVPlayer(url: Bundle.main.url(forResource: "Recording-1", withExtension: "mp4")!))
                     VideoPlayer(player: AVPlayer(url: Bundle.main.url(forResource: "Recording-2", withExtension: "mp4")!))
                     VideoPlayer(player: AVPlayer(url: Bundle.main.url(forResource: "Recording-3", withExtension: "mp4")!))
+                    VideoPlayer(player: AVPlayer(url: Bundle.main.url(forResource: "HIIII WO AI NI", withExtension: "mov")!))
                         .padding()
                 }
             }
