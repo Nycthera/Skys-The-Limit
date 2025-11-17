@@ -113,6 +113,7 @@ struct EquationListView: View {
 
                         Button("Check Line") {
                             viewModel.checkCurrentLineSolution()
+                            viewModel.updateUserGraph()
                         }
                         .font(.custom("SpaceMono-Regular", size: 20))
                         .padding(.vertical, 15)
@@ -162,7 +163,7 @@ struct EquationListView: View {
         .animation(.default, value: viewModel.isPuzzleComplete)
         .animation(.default, value: viewModel.currentTargetIndex)
         .onChange(of: viewModel.currentLatexString) { _ in
-            viewModel.updateUserGraph()
+            print("somt heere")
         }
         .navigationTitle("Draw The Stars")
         .navigationBarTitleDisplayMode(.inline)

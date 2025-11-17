@@ -1,3 +1,8 @@
+//
+//  MathEngine.swift
+//  Skys The Limit
+//
+
 import Foundation
 
 enum EquationType: String {
@@ -70,7 +75,6 @@ final class MathEngine {
     // MARK: - Strip LHS and cleanup
     // ------------------------------------------------------------
     private func strippedEquation() -> String {
-        // Remove leading 'y=' or 'f(x)=' or any letter followed by '='
         let eq = equation.replacingOccurrences(
             of: #"^[a-zA-Z]+\s*="#,
             with: "",
@@ -94,21 +98,21 @@ final class MathEngine {
     private func makeSafeExpressionString(_ input: String) -> String? {
         var cleaned = input
         
-        // 1. Remove '=' just in case
+        // Remove '='
         cleaned = cleaned.replacingOccurrences(of: "=", with: "")
         
-        // 2. Reject comparison operators
+        // Reject comparison operators
         let comparisons = ["==", "!=", "<=", ">=", "<", ">"]
         for op in comparisons {
             if cleaned.contains(op) { return nil }
         }
         
-        // 3. Reject unsafe characters
+        // Reject unsafe characters
         if cleaned.rangeOfCharacter(from: disallowedExpressionCharacters) != nil {
             return nil
         }
         
-        // 4. Only allow math-safe characters
+        // Only allow math-safe characters
         let validPattern = #"^[0-9a-zA-Z\^\+\-\*\/\(\)\.]+$"#
         guard cleaned.range(of: validPattern, options: .regularExpression) != nil else {
             return nil
@@ -188,7 +192,7 @@ final class MathEngine {
     }
     
     // ------------------------------------------------------------
-    // MARK: - Calculate points
+    // MARK: - Calculate points safely
     // ------------------------------------------------------------
     func calculatePoints(
         xRange: ClosedRange<Double> = -10...10,
@@ -204,15 +208,19 @@ final class MathEngine {
             // Substitute x
             let substituted = processed.replacingOccurrences(of: "x", with: "(\(x))")
             
+            // Ensure expression is safe
             guard let safeExpr = makeSafeExpressionString(substituted) else {
                 print("Skipping unsafe expression:", substituted)
                 continue
             }
             
-            let expr = NSExpression(format: safeExpr)
-            if let y = expr.expressionValue(with: nil, context: nil) as? Double,
+            // Attempt NSExpression, catch any crash
+            if let expr = try? NSExpression(format: safeExpr),
+               let y = expr.expressionValue(with: nil, context: nil) as? Double,
                y.isFinite {
                 result.append((x, y))
+            } else {
+                print("Skipping invalid NSExpression:", safeExpr)
             }
         }
         
