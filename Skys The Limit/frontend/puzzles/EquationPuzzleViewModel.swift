@@ -9,6 +9,9 @@ import Combine
 
 @MainActor
 class EquationPuzzleViewModel: ObservableObject {
+    //for the animation of the drawing of the line
+    @Published var newLineAdded: Bool = false
+    
     // The puzzle state
     @Published var stars: [CGPoint] = []
     @Published var successfulLines: [[(x: Double, y: Double)]] = []
@@ -76,7 +79,7 @@ class EquationPuzzleViewModel: ObservableObject {
             
             // Mark first star as connected
             connectedStarIndices.insert(currentTargetIndex)
-
+            newLineAdded.toggle()
             
             currentTargetIndex += 1
             if currentTargetIndex >= stars.count - 1 {
