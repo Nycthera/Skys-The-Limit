@@ -29,7 +29,7 @@ struct MainMenuView: View {
                     // This can link to a list of saved creations.
                     NavigationLink("My Galaxy", destination: ConstellationView())
                     // In your MainMenuView.swift
-                    NavigationLink("Tutorial", destination: TutorialLevelOneView())
+                    NavigationLink("Tutorial", destination: TutorialLevelOneView(isShowingTutorial: ))
                 }
                 .font(.custom("SpaceMono-Regular", size: 35))
                 .foregroundColor(.white)
