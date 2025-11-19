@@ -41,13 +41,32 @@ class EquationPuzzleViewModel: ObservableObject {
         resetCurrentLine()
         
         var usedPoints = Set<CGPoint>()
-        for _ in 0..<starCount {
+        
+        // Generate the first star normally
+        var previousPoint = CGPoint(
+            x: Int.random(in: -8...8),
+            y: Int.random(in: -8...8)
+        )
+        
+        stars.append(previousPoint)
+        usedPoints.insert(previousPoint)
+        
+        // Generate the rest, ensuring no vertical alignment
+        for _ in 1..<starCount {
             var newPoint: CGPoint
+            
             repeat {
-                newPoint = CGPoint(x: Int.random(in: -8...8), y: Int.random(in: -8...8))
-            } while usedPoints.contains(newPoint)
+                newPoint = CGPoint(
+                    x: Int.random(in: -8...8),
+                    y: Int.random(in: -8...8)
+                )
+            } while
+                usedPoints.contains(newPoint) ||
+                abs(newPoint.x - previousPoint.x) < 1   // 👈 avoids vertical line segments
+            
             stars.append(newPoint)
             usedPoints.insert(newPoint)
+            previousPoint = newPoint
         }
     }
     
