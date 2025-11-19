@@ -6,7 +6,7 @@ struct MainMenuView: View {
     var body: some View {
         ZStack(alignment: .top) {
 
-            Image("Space")
+            Image("Space4")
                 .resizable()
                 .aspectRatio(contentMode: .fill)
                 .edgesIgnoringSafeArea(.all)
@@ -17,7 +17,7 @@ struct MainMenuView: View {
                     .foregroundColor(.white)
                     .padding(.top, 50)
 
-                Image("Meteor")
+                Image("Meteor2")
                     .resizable()
                     .aspectRatio(contentMode: .fit)
                     .frame(width: 150, height: 150)
@@ -25,7 +25,7 @@ struct MainMenuView: View {
 
                 Spacer()
 
-                VStack(alignment: .leading, spacing: 40) {
+                VStack(alignment: .leading, spacing: 50) {
 
                     NavigationLink("Draw The Stars", destination: EquationListView())
                     NavigationLink("My Galaxy", destination: ConstellationView())

@@ -92,13 +92,13 @@ struct GraphCanvasView: View {
 //            GeometryReader { geo in
 //                let xScale = geo.size.width / CGFloat(xRange.upperBound - xRange.lowerBound)
 //                let yScale = geo.size.height / CGFloat(yRange.upperBound - yRange.lowerBound)
-//                
+//
 //                ForEach(Array(stars.enumerated()), id: \.offset) { index, star in
 //                    let p = scalePoint((Double(star.x), Double(star.y)), xScale, yScale)
-//                    
+//
 //                    Button(action: {
 //                        print("Star \(index + 1): (\(star.x), \(star.y))")
-//                    
+//
 //                    }) {
 //                        Circle()
 //                            .fill(
@@ -108,9 +108,9 @@ struct GraphCanvasView: View {
 //                            .frame(width: 10, height: 10)
 //                    }
 //                    .position(x: p.x + geo.size.width / 2, y: p.y + geo.size.height / 2)
-//                    
+//
 //                    // show coordinates
-//                    
+//
 //                }
 //            }
             
