@@ -7,6 +7,10 @@ struct EquationListView: View {
     
     @State private var currentMathString: String = ""
     @State private var isSidebarCollapsed: Bool = false
+    
+    // confetti stuff
+    @State private var isCelebrating = false
+
 
     var body: some View {
         ZStack {
@@ -58,9 +62,9 @@ struct EquationListView: View {
                         .shadow(radius: 5)
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .background(Color.black.opacity(0.7))
             }
         }
+        //“When isPuzzleComplete changes, check if it became true. If yes, upload the equations to the database.”
         .onChange(of: viewModel.isPuzzleComplete) { isComplete in
             if isComplete {
                 Task {
@@ -70,9 +74,11 @@ struct EquationListView: View {
         }
         .animation(.default, value: viewModel.isPuzzleComplete)
         .animation(.default, value: viewModel.currentTargetIndex)
-        .onChange(of: viewModel.currentLatexString) { _ in
-            print("somt heere")
-        }
+//
+//        .onChange(of: viewModel.currentLatexString) { _ in
+//            print("somt heere")
+//        }
+        
         .navigationTitle("Draw The Stars")
         .navigationBarTitleDisplayMode(.inline)
         .toolbarColorScheme(.dark, for: .navigationBar)
