@@ -4,7 +4,7 @@ struct MainMenuView: View {
     @State private var isShowingTutorial = false   // <─ ADD THIS
 
     var body: some View {
-        ZStack {
+        ZStack(alignment: .top) {
             Image("Space")
                 .resizable()
                 .aspectRatio(contentMode: .fill)
@@ -12,6 +12,11 @@ struct MainMenuView: View {
             Image("Meteor")
                 .resizable()
                 .frame(width: 1000, height: 1000)
+                .alignmentGuide(.top, computeValue: { viewDimensions in
+                    let defaultTop = viewDimensions[.top]
+                    let newTop = defaultTop - 420
+                    return newTop
+                })
 
             VStack(spacing: 30) {
                 Text("Let's start!")
