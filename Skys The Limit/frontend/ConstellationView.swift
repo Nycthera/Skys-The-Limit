@@ -11,16 +11,16 @@ struct ConstellationView: View {
     
     // Track selected constellation to show in canvas
     @State private var selectedConstellation: Constellation? = nil
-    
+     
     // Store constellation rows from Appwrite
     @State private var constellations: [Constellation] = []
     
-    let deviceID = UIDevice.current.identifierForVendor?.uuidString ?? "unknown_device"
+    let deviceID: String = UIDevice.current.identifierForVendor?.uuidString ?? "unknown_device"
     
     // 2-column flexible grid
-    private let gridColumns = [
-        GridItem(.flexible(), spacing: 16),
-        GridItem(.flexible(), spacing: 16)
+    private static let gridColumns: [GridItem] = [
+        GridItem(.flexible(minimum: 0, maximum: .infinity), spacing: 16),
+        GridItem(.flexible(minimum: 0, maximum: .infinity), spacing: 16)
     ]
     
     var body: some View {
@@ -28,45 +28,15 @@ struct ConstellationView: View {
             
             Image("Space")
                 .resizable()
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .ignoresSafeArea()
             
             ScrollView {
-                LazyVGrid(columns: gridColumns, spacing: 20) {
+                LazyVGrid(columns: Self.gridColumns, spacing: 20) {
                     ForEach(constellations) { constellation in
-                        VStack(spacing: 12) {
-                            Text(constellation.name)
-                                .font(.title2)
-                                .fontWeight(.semibold)
-                                .foregroundColor(.white)
-                            
-                            Text("\(constellation.equations.count) equations")
-                                .font(.subheadline)
-                                .foregroundColor(.white.opacity(0.8))
-                            
-                            if constellation.isShared {
-                                Text("Shared")
-                                    .font(.caption2)
-                                    .foregroundColor(.green)
+                        ConstellationCellView(constellation: constellation)
+                            .onTapGesture {
+                                selectedConstellation = constellation
                             }
-                        }
-                        .padding(20)
-                        .frame(maxWidth: .infinity, minHeight: 150)
-                        .background(
-                            Color.white.opacity(0.1)
-                                .background(.ultraThinMaterial)
-                                .blur(radius: 1)
-                        )
-                        .cornerRadius(20)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 20)
-                                .stroke(Color.white.opacity(0.2), lineWidth: 1)
-                        )
-                        .shadow(color: Color.black.opacity(0.3), radius: 10, x: 0, y: 5)
-                        // <-- Tapping a box opens canvas
-                        .onTapGesture {
-                            selectedConstellation = constellation
-                        }
                     }
                 }
                 .padding()
@@ -104,22 +74,8 @@ struct ConstellationView: View {
         }
         // <-- Full screen cover to show the selected constellation
         .fullScreenCover(item: $selectedConstellation) { constellation in
-            // Convert equations to points via MathEngine
-            let points = constellation.equations.flatMap { eqStr -> [(x: Double, y: Double)] in
-                let engine = MathEngine(equation: eqStr)
-                return engine.evaluate() ?? []
-            }
+            CustomConstellationView(ID: constellation.id)
             
-            // Build a list of lines (for simplicity, each consecutive point in array)
-            let lines: [[(x: Double, y: Double)]] = points.chunked(into: 2)
-            
-            CustomConstellationView(
-                stars: points.map { CGPoint(x: $0.x, y: $0.y) },
-                successfulLines: lines,
-                currentLine: [],
-                currentTargetIndex: 0,
-                connectedStarIndices: []
-            )
         }
         .onAppear {
             Task {
@@ -159,6 +115,44 @@ extension Array {
             index += size
         }
         return chunks
+    }
+}
+
+private struct ConstellationCellView: View {
+    let constellation: Constellation
+
+    var body: some View {
+        VStack(spacing: 12) {
+            Text(constellation.name)
+                .font(.title2)
+                .fontWeight(.semibold)
+                .foregroundColor(.white)
+
+            Text("\(constellation.equations.count) equations")
+                .font(.subheadline)
+                .foregroundColor(.white.opacity(0.8))
+
+            if constellation.isShared {
+                Text("Shared")
+                    .font(.caption2)
+                    .foregroundColor(.green)
+            }
+        }
+        .padding(20)
+        .frame(maxWidth: .infinity, minHeight: 150)
+        .background(
+            RoundedRectangle(cornerRadius: 20, style: .continuous)
+                .fill(Color.white.opacity(0.08))
+                .background(
+                    RoundedRectangle(cornerRadius: 20, style: .continuous)
+                        .fill(.ultraThinMaterial)
+                )
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 20, style: .continuous)
+                .stroke(Color.white.opacity(0.2), lineWidth: 1)
+        )
+        .shadow(color: Color.black.opacity(0.3), radius: 10, x: 0, y: 5)
     }
 }
 

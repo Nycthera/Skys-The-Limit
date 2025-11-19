@@ -5,19 +5,33 @@
 //  Created by Chris  on 19/11/25.
 //
 
-import Foundation
 import SwiftUI
+import SwiftMath
+
+struct DocumentFormat: Codable, Identifiable {
+    let id: String
+    let userid: String
+    let equations: [String]?
+    let isShared: Bool
+    let createdAt: Date?
+    let updatedAt: Date?
+    let name: String
+}
 
 struct CustomConstellationView: View {
     
     @State private var selectedStarCoordinates: String? = nil
     @State private var selectedStarIndex: Int? = nil
-
-    let stars: [CGPoint]
-    let successfulLines: [[(x: Double, y: Double)]]
-    let currentLine: [(x: Double, y: Double)]
-    let currentTargetIndex: Int
-    let connectedStarIndices: Set<Int>
+    @State private var arrayOfEquations: [String] = []
+    @State private var stars: [CGPoint] = []
+    @State private var successfulLines: [[(x: Double, y: Double)]] = []
+    
+    @State private var numberOfStars: Int = 0
+    
+    let currentLine: [(x: Double, y: Double)] = []
+    let currentTargetIndex: Int = 0
+    let connectedStarIndices: Set<Int> = []
+    let ID: String
     
     private let xRange: ClosedRange<Double> = -10...10
     private let yRange: ClosedRange<Double> = -10...10
@@ -30,10 +44,9 @@ struct CustomConstellationView: View {
                 
                 context.translateBy(x: size.width / 2, y: size.height / 2)
                 
-                // --- Layer 0: Grid lines ---
                 drawGrid(context: context, size: size, xScale: xScale, yScale: yScale)
                 
-                // --- Layer 1: Axes ---
+                // Axes
                 var axes = Path()
                 axes.move(to: CGPoint(x: -size.width/2, y: 0))
                 axes.addLine(to: CGPoint(x: size.width/2, y: 0))
@@ -41,9 +54,10 @@ struct CustomConstellationView: View {
                 axes.addLine(to: CGPoint(x: 0, y: size.height/2))
                 context.stroke(axes, with: .color(.white.opacity(0.7)), lineWidth: 2)
                 
-                // --- Layer 2: Completed lines ---
+                // Completed lines
                 for (lineIndex, line) in successfulLines.enumerated() {
                     guard let first = line.first else { continue }
+                    guard lineIndex + 1 < stars.count else { continue }
                     
                     let starA = stars[lineIndex]
                     let starB = stars[lineIndex + 1]
@@ -69,7 +83,7 @@ struct CustomConstellationView: View {
                     }
                 }
                 
-                // --- Layer 3: Current preview line ---
+                // Current preview line
                 if let first = currentLine.first {
                     var path = Path()
                     path.move(to: scalePoint(first, xScale: xScale, yScale: yScale))
@@ -80,12 +94,11 @@ struct CustomConstellationView: View {
                                    with: .color(.white.opacity(0.5)),
                                    style: StrokeStyle(lineWidth: 2, lineCap: .round, dash: [6]))
                 }
-                
             }
             .background(Color.black.opacity(0.7))
             .cornerRadius(12)
             
-            // --- Stars overlay ---
+            // Stars overlay
             GeometryReader { geo in
                 let xScale = geo.size.width / CGFloat(xRange.upperBound - xRange.lowerBound)
                 let yScale = geo.size.height / CGFloat(yRange.upperBound - yRange.lowerBound)
@@ -102,9 +115,9 @@ struct CustomConstellationView: View {
                             Circle()
                                 .fill(
                                     connectedStarIndices.contains(index) ? Color.blue :
-                                    (index == currentTargetIndex || index == currentTargetIndex + 1
-                                     ? Color.yellow
-                                     : Color.white.opacity(0.7))
+                                        (index == currentTargetIndex || index == currentTargetIndex + 1
+                                         ? Color.yellow
+                                         : Color.white.opacity(0.7))
                                 )
                                 .frame(width: 10, height: 10)
                         }
@@ -123,32 +136,46 @@ struct CustomConstellationView: View {
                 }
             }
         }
+        .onAppear {
+            Task {
+                if let document: Constellation = await get_document_for_user(rowId: ID) {
+                    self.arrayOfEquations = document.equations ?? []
+                    self.numberOfStars = self.arrayOfEquations.count
+                    
+                    var allPoints: [(x: Double, y: Double)] = []
+                    for eqStr in self.arrayOfEquations {
+                        let engine = MathEngine(equation: eqStr)
+                        let points = engine.evaluate() ?? []
+                        allPoints.append(contentsOf: points)
+                    }
+                    
+                    self.stars = allPoints.map { CGPoint(x: $0.x, y: $0.y) }
+                    self.successfulLines = allPoints.chunked(into: 2)
+                }
+            }
+        }
+        
     }
     
-    // MARK: - Helper: Scale model coords → screen coords
+    // MARK: - Helpers
+    
     private func scalePoint(_ point: (x: Double, y: Double), xScale: CGFloat, yScale: CGFloat) -> CGPoint {
         CGPoint(x: CGFloat(point.x) * xScale,
                 y: -CGFloat(point.y) * yScale)
     }
     
-    // MARK: - Helper: Draw grid lines
     private func drawGrid(context: GraphicsContext, size: CGSize, xScale: CGFloat, yScale: CGFloat) {
         var grid = Path()
-        
-        // Vertical lines
         for x in Int(xRange.lowerBound)...Int(xRange.upperBound) {
             let px = CGFloat(x) * xScale
             grid.move(to: CGPoint(x: px, y: -size.height/2))
             grid.addLine(to: CGPoint(x: px, y: size.height/2))
         }
-        
-        // Horizontal lines
         for y in Int(yRange.lowerBound)...Int(yRange.upperBound) {
             let py = CGFloat(y) * yScale
             grid.move(to: CGPoint(x: -size.width/2, y: -py))
             grid.addLine(to: CGPoint(x: size.width/2, y: -py))
         }
-        
         context.stroke(grid, with: .color(.gray.opacity(0.2)), lineWidth: 1)
     }
 }
