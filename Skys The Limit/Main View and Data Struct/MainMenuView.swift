@@ -6,7 +6,7 @@ struct MainMenuView: View {
     var body: some View {
         ZStack(alignment: .top) {
 
-            Image("Space4")
+            Image("Space")
                 .resizable()
                 .aspectRatio(contentMode: .fill)
                 .edgesIgnoringSafeArea(.all)
@@ -17,7 +17,7 @@ struct MainMenuView: View {
                     .foregroundColor(.white)
                     .padding(.top, 50)
 
-                Image("Meteor2")
+                Image("Meteor")
                     .resizable()
                     .aspectRatio(contentMode: .fit)
                     .frame(width: 150, height: 150)

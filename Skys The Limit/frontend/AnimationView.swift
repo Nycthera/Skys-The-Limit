@@ -13,12 +13,6 @@ struct AnimationView: View {
     
     var body: some View {
         ZStack {
-            //            Image("Space")
-            //                .resizable()
-            //                .aspectRatio(contentMode: .fill)
-            //                .edgesIgnoringSafeArea(.all)
-            
-            
             GalaxyBackground()
                 .ignoresSafeArea()
                 .onAppear(){
@@ -29,7 +23,7 @@ struct AnimationView: View {
             
             VStack {
                 Spacer()
-                Image("Meteor2")
+                Image("Meteor")
                     .resizable()
                     .aspectRatio(contentMode: .fit)
                     .clipShape(RoundedRectangle(cornerRadius: 35))
@@ -67,8 +61,6 @@ struct AnimationView: View {
 }
 
 struct GalaxyBackground: View {
-    @State private var blobShift = false
-    @State private var blobSwirl = false
     @State private var starAnimate = false
     @State private var starDrift = false
     @State private var fogShift = false
@@ -88,35 +80,6 @@ struct GalaxyBackground: View {
                 endRadius: 900
             )
             .ignoresSafeArea()
-            
-            
-            // swirling colour blobs in the center that gradually gets mixed together like it shifts but i kinda want a swirl like marbled cake
-            ZStack {
-                MarbledBlob(color: .purple, scale: 1.5, opacity: 0.7,
-                            offsetX: blobShift ? -220 : 180,
-                            offsetY: blobShift ? -120 : 140,
-                            swirl: blobSwirl)
-                
-                MarbledBlob(color: .blue, scale: 1.7, opacity: 0.5,
-                            offsetX: blobShift ? 250 : -200,
-                            offsetY: blobShift ? 90 : -140,
-                            swirl: blobSwirl)
-                
-                MarbledBlob(color: .pink, scale: 1.5, opacity: 0.3,
-                            offsetX: blobShift ? -180 : 200,
-                            offsetY: blobShift ? 200 : -160,
-                            swirl: blobSwirl)
-                
-                MarbledBlob(color: .yellow, scale: 1.6, opacity: 0.35,
-                            offsetX: blobShift ? 160 : -140,
-                            offsetY: blobShift ? -200 : 140,
-                            swirl: blobSwirl)
-                
-            }
-            .blur(radius: 10)
-            .animation(.easeInOut(duration: 4).repeatForever(autoreverses: true), value: blobShift)
-            .animation(.linear(duration: 40).repeatForever(autoreverses: false), value: blobSwirl)
-            
             
             
             // the sparkly stars
@@ -174,47 +137,9 @@ struct GalaxyBackground: View {
             }
             .blendMode(.screen)
         }
-        .onAppear {
-            blobShift = true      // blobs drift
-            blobSwirl = true      // blobs rotate
-        }
+      
     }
 }
-
-
-//marble blob struct
-struct MarbledBlob: View {
-    var color: Color
-    var scale: CGFloat
-    var opacity: CGFloat
-    var offsetX: CGFloat
-    var offsetY: CGFloat
-    var swirl: Bool
-    
-    var body: some View {
-        Circle()
-            .fill(
-                RadialGradient(
-                    colors: [
-                        color.opacity(opacity),
-                        color.opacity(opacity * 0.5),
-                        color.opacity(opacity * 0.1)
-                    ],
-                    center: .center,
-                    startRadius: 30,
-                    endRadius: 250
-                )
-            )
-            .scaleEffect(scale)
-            .offset(x: offsetX, y: offsetY)
-            .rotationEffect(.degrees(swirl ? 360 : 0))
-            .animation(.linear(duration: Double.random(in: 18...30)).repeatForever(autoreverses: false),
-                       value: swirl)
-    }
-}
-
-
-
 struct AnimationValues {
     var scale = 8.0
     var horizontalTranslation = 0.0
