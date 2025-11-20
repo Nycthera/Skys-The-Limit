@@ -12,6 +12,10 @@ struct EquationListView: View {
     @State private var isCelebrating = false
     @State private var goHome = false
     
+    //saving constellation
+    @State private var showSaveModal = false
+    @State private var newConstellationName = ""
+
     
     
     var body: some View {
@@ -82,12 +86,23 @@ struct EquationListView: View {
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .contentShape(Rectangle())
                     .onTapGesture {
-                        // stop confetti
                         isCelebrating = false
-                        // navigate home
-                        goHome = true
+                        showSaveModal = true    // << PRESENT SAVE MODAL
                     }
+
                     .zIndex(20)
+                    .sheet(isPresented: $showSaveModal) {
+                        SaveConstellationModalSheetView(
+                            name: $newConstellationName,
+                            onSubmit: {
+                                Task {
+                                    await saveCompletedConstellation()
+                                    goHome = true        // go home *after saving*
+                                }
+                            }
+                        )
+                    }
+
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .background(Color.black.opacity(0.5))  // ensures ZStack fills space
@@ -108,6 +123,22 @@ struct EquationListView: View {
             
             
         }
+    }
+    
+    func saveCompletedConstellation() async {
+        // Convert CGPoint → dictionary format
+        let equationStrings = viewModel.successfulEquations
+
+        // Convert stars to arrays of [x,y]
+        let starPositions = viewModel.stars.map { star in
+            "\(Int(star.x)), \(Int(star.y))"
+        }
+
+        // Upload to Appwrite
+        await post_to_database(
+            equations: starPositions,
+            name: newConstellationName
+        )
     }
     
     private struct SidebarView: View {
@@ -220,3 +251,4 @@ struct EquationListView: View {
         }
     }
 }
+

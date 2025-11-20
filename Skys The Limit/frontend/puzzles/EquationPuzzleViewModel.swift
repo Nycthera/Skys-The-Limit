@@ -33,7 +33,7 @@ class EquationPuzzleViewModel: ObservableObject {
     }
     
     /// Generates a new set of random stars and resets the game state.
-    func generateNewPuzzle(starCount: Int = 4) {
+    func generateNewPuzzle(starCount: Int = 2) {
         stars.removeAll()
         successfulLines.removeAll()
         currentTargetIndex = 0
