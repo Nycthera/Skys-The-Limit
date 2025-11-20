@@ -196,7 +196,8 @@ final class MathEngine {
     // ------------------------------------------------------------
     func calculatePoints(
         xRange: ClosedRange<Double> = -10...10,
-        step: Double = 1.0
+        step: Double = 1.0,
+        errorHandler: ((String) -> Void)? = nil
     ) -> [(x: Double, y: Double)] {
         
         var result: [(x: Double, y: Double)] = []
@@ -210,23 +211,24 @@ final class MathEngine {
             
             // Ensure expression is safe
             guard let safeExpr = makeSafeExpressionString(substituted) else {
-                print("Skipping unsafe expression:", substituted)
+                errorHandler?("Unsafe expression skipped: \(substituted)")
                 continue
             }
             
-            // Attempt NSExpression, catch any crash
-            if let expr = try? NSExpression(format: safeExpr),
-               let y = expr.expressionValue(with: nil, context: nil) as? Double,
-               y.isFinite {
-                result.append((x, y))
+            // Very safe NSExpression initialization
+            if let expr = try? NSExpression(format: safeExpr) {
+                if let y = expr.expressionValue(with: nil, context: nil) as? Double, y.isFinite {
+                    result.append((x, y))
+                }
             } else {
-                print("Skipping invalid NSExpression:", safeExpr)
+                // Cannot even create NSExpression → show popup
+                errorHandler?("Unable to parse expression: \(safeExpr)")
             }
         }
         
         return result
     }
-    
+
     // ------------------------------------------------------------
     // MARK: - Public Evaluate
     // ------------------------------------------------------------

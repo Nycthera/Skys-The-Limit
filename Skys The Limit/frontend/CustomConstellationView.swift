@@ -2,181 +2,247 @@
 //  CustomConstellationView.swift
 //  Skys The Limit
 //
-//  Created by Chris  on 19/11/25.
+//  Created by Chris on 19/11/25.
 //
 
 import SwiftUI
 import SwiftMath
 
-struct DocumentFormat: Codable, Identifiable {
-    let id: String
-    let userid: String
-    let equations: [String]?
-    let isShared: Bool
-    let createdAt: Date?
-    let updatedAt: Date?
-    let name: String
-}
-
 struct CustomConstellationView: View {
-    
-    @State private var selectedStarCoordinates: String? = nil
-    @State private var selectedStarIndex: Int? = nil
     @State private var arrayOfEquations: [String] = []
     @State private var stars: [CGPoint] = []
     @State private var successfulLines: [[(x: Double, y: Double)]] = []
-    
-    @State private var numberOfStars: Int = 0
-    
-    let currentLine: [(x: Double, y: Double)] = []
-    let currentTargetIndex: Int = 0
-    let connectedStarIndices: Set<Int> = []
+
+    // Separate strings for display and math engine
+    @State private var editingLatexString: String = ""
+    @State private var editingMathString: String = ""
+    @State private var editingIndex: Int? = nil // nil = new, else edit mode
+    @State private var isSidebarCollapsed = false
+    @State private var showSaveModal = false // Save modal
+
+    @Environment(\.presentationMode) var presentationMode
     let ID: String
-    
-    private let xRange: ClosedRange<Double> = -10...10
-    private let yRange: ClosedRange<Double> = -10...10
-    
+    private let sidebarWidth: CGFloat = 250
+
     var body: some View {
-        GeometryReader { geo in
-            Canvas { context, size in
-                let xScale = size.width / CGFloat(xRange.upperBound - xRange.lowerBound)
-                let yScale = size.height / CGFloat(yRange.upperBound - yRange.lowerBound)
-                
-                context.translateBy(x: size.width / 2, y: size.height / 2)
-                
-                drawGrid(context: context, size: size, xScale: xScale, yScale: yScale)
-                
-                // Axes
-                var axes = Path()
-                axes.move(to: CGPoint(x: -size.width/2, y: 0))
-                axes.addLine(to: CGPoint(x: size.width/2, y: 0))
-                axes.move(to: CGPoint(x: 0, y: -size.height/2))
-                axes.addLine(to: CGPoint(x: 0, y: size.height/2))
-                context.stroke(axes, with: .color(.white.opacity(0.7)), lineWidth: 2)
-                
-                // Completed lines
-                for (lineIndex, line) in successfulLines.enumerated() {
-                    guard let first = line.first else { continue }
-                    guard lineIndex + 1 < stars.count else { continue }
-                    
-                    let starA = stars[lineIndex]
-                    let starB = stars[lineIndex + 1]
-                    
-                    let minX = min(starA.x, starB.x)
-                    let maxX = max(starA.x, starB.x)
-                    let minY = min(starA.y, starB.y)
-                    let maxY = max(starA.y, starB.y)
-                    
-                    let filteredLine = line.filter { point in
-                        (minX...maxX).contains(point.x) && (minY...maxY).contains(point.y)
-                    }
-                    
-                    if !filteredLine.isEmpty {
-                        var path = Path()
-                        path.move(to: scalePoint(filteredLine.first!, xScale: xScale, yScale: yScale))
-                        for point in filteredLine.dropFirst() {
-                            path.addLine(to: scalePoint(point, xScale: xScale, yScale: yScale))
-                        }
-                        context.stroke(path,
-                                       with: .color(.cyan),
-                                       style: StrokeStyle(lineWidth: 3, lineCap: .round))
-                    }
-                }
-                
-                // Current preview line
-                if let first = currentLine.first {
-                    var path = Path()
-                    path.move(to: scalePoint(first, xScale: xScale, yScale: yScale))
-                    for point in currentLine.dropFirst() {
-                        path.addLine(to: scalePoint(point, xScale: xScale, yScale: yScale))
-                    }
-                    context.stroke(path,
-                                   with: .color(.white.opacity(0.5)),
-                                   style: StrokeStyle(lineWidth: 2, lineCap: .round, dash: [6]))
-                }
-            }
-            .background(Color.black.opacity(0.7))
-            .cornerRadius(12)
-            
-            // Stars overlay
+        NavigationView {
             GeometryReader { geo in
-                let xScale = geo.size.width / CGFloat(xRange.upperBound - xRange.lowerBound)
-                let yScale = geo.size.height / CGFloat(yRange.upperBound - yRange.lowerBound)
-                
-                ForEach(Array(stars.enumerated()), id: \.offset) { index, star in
-                    let p = scalePoint((Double(star.x), Double(star.y)), xScale: xScale, yScale: yScale)
-                    let screenX = p.x + geo.size.width / 2
-                    let screenY = p.y + geo.size.height / 2
-                    
-                    ZStack {
-                        Button(action: {
-                            selectedStarIndex = index
-                        }) {
-                            Circle()
-                                .fill(
-                                    connectedStarIndices.contains(index) ? Color.blue :
-                                        (index == currentTargetIndex || index == currentTargetIndex + 1
-                                         ? Color.yellow
-                                         : Color.white.opacity(0.7))
-                                )
-                                .frame(width: 10, height: 10)
+                ZStack {
+                    // Background
+                    Image("Space")
+                        .resizable()
+                        .scaledToFill()
+                        .ignoresSafeArea()
+
+                    HStack(spacing: 0) {
+                        // Sidebar
+                        CustomSidebarView(
+                            isCollapsed: isSidebarCollapsed,
+                            equations: $arrayOfEquations,
+                            editingString: $editingLatexString,
+                            editingIndex: $editingIndex
+                        )
+
+                        // Game Area
+                        VStack(spacing: 15) {
+                            // Canvas
+                            CustomGraphCanvasView(
+                                stars: stars,
+                                successfulLines: successfulLines,
+                                equations: arrayOfEquations,
+                                ID: ID
+                            )
+                            .frame(height: geo.size.height * 0.4)
+                            .background(Color.black.opacity(0.2))
+                            .cornerRadius(12)
+                            .layoutPriority(1)
+
+                            // Keyboard
+                            MathKeyboardView(
+                                latexString: $editingLatexString,
+                                mathString: $editingMathString
+                            )
+                            .layoutPriority(1)
+
+                            // Add / Update button
+                            Button {
+                                guard !editingMathString.isEmpty else { return }
+                                if let index = editingIndex {
+                                    arrayOfEquations[index] = editingMathString
+                                } else {
+                                    arrayOfEquations.append(editingMathString)
+                                }
+                                editingLatexString = ""
+                                editingMathString = ""
+                                editingIndex = nil
+                            } label: {
+                                Text(editingIndex != nil ? "Update Equation" : "Add Equation")
+                                    .font(.custom("SpaceMono-Regular", size: 20))
+                                    .frame(maxWidth: .infinity)
+                                    .padding()
+                                    .background(Color.white)
+                                    .foregroundColor(.black)
+                                    .cornerRadius(15)
+                            }
+
+                            // Current input display
+                            VStack(alignment: .leading, spacing: 5) {
+                                Text("Current Input:")
+                                    .font(.custom("SpaceMono-Bold", size: 16))
+                                    .foregroundColor(.white)
+                                Text(editingLatexString.isEmpty ? "(empty)" : editingLatexString)
+                                    .font(.custom("SpaceMono-Regular", size: 16))
+                                    .foregroundColor(.yellow)
+                                    .padding(6)
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                    .background(Color.white.opacity(0.1))
+                                    .cornerRadius(8)
+                            }
+                            .padding(.top, 8)
+
+                            Spacer(minLength: 0)
                         }
-                        
-                        if selectedStarIndex == index {
-                            Text("(\(Int(star.x)), \(Int(star.y)))")
-                                .font(.caption)
+                        .padding()
+                        .frame(width: geo.size.width - (isSidebarCollapsed ? 0 : sidebarWidth))
+                        .frame(maxHeight: .infinity)
+                    }
+                }
+            }
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button {
+                        withAnimation(.easeInOut) { isSidebarCollapsed.toggle() }
+                    } label: {
+                        Image(systemName: "sidebar.left")
+                            .font(.system(size: 25))
+                    }
+                }
+
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    HStack(spacing: 12) {
+                        // Save icon
+                        Button {
+                            showSaveModal = true
+                        } label: {
+                            Image(systemName: "square.and.arrow.down")
+                                .font(.system(size: 20, weight: .bold))
                                 .foregroundColor(.white)
-                                .padding(4)
-                                .background(Color.black.opacity(0.7))
-                                .cornerRadius(6)
-                                .offset(y: -25)
                         }
+
+                        // Back button
+                        Button("Back") { presentationMode.wrappedValue.dismiss() }
+                            .font(.custom("SpaceMono-Regular", size: 18))
+                            .padding(5)
+                            .background(Color.black.opacity(0.5))
+                            .foregroundColor(.white)
+                            .cornerRadius(8)
                     }
-                    .position(x: screenX, y: screenY)
                 }
             }
-        }
-        .onAppear {
-            Task {
-                if let document: Constellation = await get_document_for_user(rowId: ID) {
-                    self.arrayOfEquations = document.equations ?? []
-                    self.numberOfStars = self.arrayOfEquations.count
-                    
-                    var allPoints: [(x: Double, y: Double)] = []
-                    for eqStr in self.arrayOfEquations {
-                        let engine = MathEngine(equation: eqStr)
-                        let points = engine.evaluate() ?? []
-                        allPoints.append(contentsOf: points)
+            // Save modal
+            .sheet(isPresented: $showSaveModal) {
+                SaveConstellationModalView(
+                    isPresented: $showSaveModal,
+                    equations: $arrayOfEquations,
+                    rowId: ID,
+                )
+            }
+
+            .onAppear {
+                Task {
+                    if let constellation: Constellation = await get_document_for_user(rowId: ID) {
+                        self.arrayOfEquations = constellation.equations ?? []
                     }
-                    
-                    self.stars = allPoints.map { CGPoint(x: $0.x, y: $0.y) }
-                    self.successfulLines = allPoints.chunked(into: 2)
                 }
             }
+            // Auto-update canvas whenever equations change
+            .onChange(of: arrayOfEquations) { _ in
+                updateStarsFromEquations()
+            }
         }
-        
+        .navigationViewStyle(.stack)
     }
-    
-    // MARK: - Helpers
-    
-    private func scalePoint(_ point: (x: Double, y: Double), xScale: CGFloat, yScale: CGFloat) -> CGPoint {
-        CGPoint(x: CGFloat(point.x) * xScale,
-                y: -CGFloat(point.y) * yScale)
-    }
-    
-    private func drawGrid(context: GraphicsContext, size: CGSize, xScale: CGFloat, yScale: CGFloat) {
-        var grid = Path()
-        for x in Int(xRange.lowerBound)...Int(xRange.upperBound) {
-            let px = CGFloat(x) * xScale
-            grid.move(to: CGPoint(x: px, y: -size.height/2))
-            grid.addLine(to: CGPoint(x: px, y: size.height/2))
+
+    // MARK: - Update stars from equations
+    private func updateStarsFromEquations() {
+        var allPoints: [(x: Double, y: Double)] = []
+        for eq in arrayOfEquations {
+            let engine = MathEngine(equation: eq)
+            let points = engine.evaluate() ?? []
+            allPoints.append(contentsOf: points)
         }
-        for y in Int(yRange.lowerBound)...Int(yRange.upperBound) {
-            let py = CGFloat(y) * yScale
-            grid.move(to: CGPoint(x: -size.width/2, y: -py))
-            grid.addLine(to: CGPoint(x: size.width/2, y: -py))
-        }
-        context.stroke(grid, with: .color(.gray.opacity(0.2)), lineWidth: 1)
+        stars = allPoints.map { CGPoint(x: $0.x, y: $0.y) }
+        successfulLines = allPoints.chunked(into: 2)
     }
 }
 
+// MARK: - Sidebar
+private struct CustomSidebarView: View {
+    let isCollapsed: Bool
+    @Binding var equations: [String]
+    @Binding var editingString: String
+    @Binding var editingIndex: Int?
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            if !isCollapsed {
+                Text("Equations")
+                    .font(.custom("SpaceMono-Bold", size: 24))
+                    .foregroundColor(.white)
+                    .padding(.top, 20)
+
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 8) {
+                        ForEach(equations.indices, id: \.self) { idx in
+                            MathView(
+                                equation: equations[idx],
+                                textAlignment: .left,
+                                fontSize: 20
+                            )
+                            .padding(8)
+                            .background(Color.white.opacity(0.1))
+                            .cornerRadius(8)
+                            .onTapGesture {
+                                editingString = equations[idx]
+                                editingIndex = idx
+                            }
+                            .onLongPressGesture {
+                                withAnimation {
+                                    equations.remove(at: idx)
+                                    if editingIndex == idx {
+                                        editingString = ""
+                                        editingIndex = nil
+                                    } else if let current = editingIndex, current > idx {
+                                        editingIndex = current - 1
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    .padding(.horizontal, 8)
+                }
+
+                // Input for new equation / edit
+                VStack(spacing: 5) {
+                    Text("New Equation / Edit:")
+                        .font(.custom("SpaceMono-Bold", size: 16))
+                        .foregroundColor(.white)
+
+                    TextField("Type here...", text: $editingString)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .padding(.horizontal, 8)
+                        .font(.custom("SpaceMono-Regular", size: 16))
+                        .background(Color.white.opacity(0.1))
+                        .cornerRadius(8)
+                }
+                .padding(.horizontal, 8)
+            }
+
+            Spacer()
+        }
+        .frame(width: isCollapsed ? 0 : 250)
+        .clipped()
+        .background(isCollapsed ? Color.clear : Color.black.opacity(0.4))
+    }
+}
