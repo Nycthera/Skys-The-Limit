@@ -1,31 +1,32 @@
-name: Swift Lint & Format
+name: Lint and Format Swift Code
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main
   pull_request:
-    branches: [ main ]
+    branches:
+      - main
 
 jobs:
-  lint-format:
-    name: Lint and Format Swift Code
+  lint-and-format:
     runs-on: macos-latest
-
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v3
 
-      - name: Install SwiftLint and SwiftFormat
+      - name: Install Homebrew
         run: |
-          brew install swiftlint || echo "SwiftLint already installed"
-          brew install swiftformat || echo "SwiftFormat already installed"
+          /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+          echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> $GITHUB_ENV
+          eval "$(/opt/homebrew/bin/brew shellenv)"
+
+      - name: Install SwiftLint & SwiftFormat
+        run: |
+          brew install swiftlint swiftformat
+
+      - name: Remove trailing whitespace
+        run: swiftformat . --stripwhitespace
 
       - name: Run SwiftLint
         run: swiftlint
-
-      - name: Run SwiftFormat
-        run: swiftformat .
-
-      - name: Run Swift Built-in Formatter
-        run: swift format --in-place --recursive Sources/
 
