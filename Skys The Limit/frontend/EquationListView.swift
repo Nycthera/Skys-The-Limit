@@ -93,8 +93,9 @@ struct EquationListView: View {
                     .zIndex(20)
                     .sheet(isPresented: $showSaveModal) {
                         SaveConstellationModalView(
-                            name: $newConstellationName,
-                            onSubmit: {
+                            isPresented: $showSaveModal,
+                            equations: $viewModel.successfulEquations,
+                            onSave: {
                                 Task {
                                     await saveCompletedConstellation()
                                     goHome = true        // go home *after saving*
