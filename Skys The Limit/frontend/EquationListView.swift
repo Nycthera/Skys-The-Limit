@@ -92,7 +92,7 @@ struct EquationListView: View {
 
                     .zIndex(20)
                     .sheet(isPresented: $showSaveModal) {
-                        SaveConstellationModalSheetView(
+                        SaveConstellationModalView(
                             name: $newConstellationName,
                             onSubmit: {
                                 Task {

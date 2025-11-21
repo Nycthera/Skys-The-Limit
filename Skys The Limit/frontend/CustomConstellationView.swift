@@ -145,7 +145,6 @@ struct CustomConstellationView: View {
                 SaveConstellationModalView(
                     isPresented: $showSaveModal,
                     equations: $arrayOfEquations,
-                    rowId: ID,
                 )
             }
 
