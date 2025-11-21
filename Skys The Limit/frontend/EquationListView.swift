@@ -95,6 +95,7 @@ struct EquationListView: View {
                         SaveConstellationModalView(
                             isPresented: $showSaveModal,
                             equations: $viewModel.successfulEquations,
+                            existingName: newConstellationName,
                             onSave: {
                                 Task {
                                     await saveCompletedConstellation()

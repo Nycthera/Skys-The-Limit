@@ -10,13 +10,21 @@ import SwiftUI
 
 struct SaveConstellationModalView: View {
     @Binding var isPresented: Bool
-    @Binding var equations: [String]
+      @Binding var equations: [String]
+      var existingName: String   // <-- ADD THIS
 
-    // Optional closure called when the user saves
+      @State private var constellationName: String = ""
+      @State private var isShared: Bool = false
+  
+    init(isPresented: Binding<Bool>, equations: Binding<[String]>, existingName: String, onSave: (() -> Void)? = nil) {
+        self._isPresented = isPresented
+        self._equations = equations
+        self.existingName = existingName
+        self._constellationName = State(initialValue: existingName)
+        self.onSave = onSave
+    }
+
     var onSave: (() -> Void)? = nil
-
-    @State private var constellationName: String = ""
-    @State private var isShared: Bool = false
 
     var body: some View {
         NavigationView {
@@ -74,8 +82,13 @@ struct SaveConstellationModalView: View {
 
     // Example async save function
     private func saveConstellation() async {
-        // Replace this with your actual save logic
-        // e.g., await save_to_database(name: constellationName, equations: equations, shared: isShared)
-        print("Saving constellation '\(constellationName)' with \(equations.count) equations. Shared: \(isShared)")
+        guard !constellationName.isEmpty else { return }
+        
+        await post_to_database(
+            equations: equations,
+            name: constellationName
+        )
+        
+        print("Saved constellation '\(constellationName)' with \(equations.count) equations")
     }
 }

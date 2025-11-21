@@ -15,6 +15,9 @@ var userTableIDs: [String] = []
 
 /// Creates a brand new document for a first-time user.
 func post_to_database(equations: [String], name: String) async {
+    let safeName = name.trimmingCharacters(in: .whitespacesAndNewlines)
+    let finalName = safeName.isEmpty ? "Untitled" : safeName
+
     print("User has no document. Creating a new one...")
     do {
         let document = try await appwrite.table.createRow(
@@ -25,7 +28,7 @@ func post_to_database(equations: [String], name: String) async {
                 "userid": deviceID,
                 "equations": equations,
                 "isShared": false,
-                "name": name
+                "name": finalName
             ],
             permissions: [
                 Permission.read(Role.any()),
@@ -34,12 +37,12 @@ func post_to_database(equations: [String], name: String) async {
             ]
         )
         print("Document created successfully: \(document.id)")
-        // After creating, we should update our list of known IDs.
         userTableIDs.append(document.id)
     } catch {
         print("Error creating document: \(error.localizedDescription)")
     }
 }
+
 
 
 /// Fetches and stores the document IDs for the current user.
@@ -70,6 +73,9 @@ func list_document_for_user() async {
 /// Updates a document with a new list of equations and name, using a specific row/document ID.
 /// If the document doesn't exist, it creates a new one.
 func update_document(rowId: String, equations: [String], name: String) async {
+    let safeName = name.trimmingCharacters(in: .whitespacesAndNewlines)
+    let finalName = safeName.isEmpty ? "Untitled" : safeName
+
     print("Updating document with ID: \(rowId)...")
     do {
         _ = try await appwrite.table.updateRow(
@@ -78,7 +84,7 @@ func update_document(rowId: String, equations: [String], name: String) async {
             rowId: rowId,
             data: [
                 "equations": equations,
-                "name": name
+                "name": finalName
             ],
             permissions: [Permission.read(Role.any())]
         )
@@ -87,6 +93,7 @@ func update_document(rowId: String, equations: [String], name: String) async {
         print("Error updating document: \(error.localizedDescription)")
     }
 }
+
 
 // MARK: - Delete (DELETE)
 func delete_document(rowId: String) async {
@@ -135,26 +142,14 @@ func get_shared_document(rowId: String) async {
 
 /// Fetches the first document belonging to the current user
 /// and prints/returns its contents.
-struct SerializablePoint: Codable {
-    let x: Double
-    let y: Double
-    init(x: Double, y: Double) { self.x = x; self.y = y }
-    init(_ cg: CGPoint) { self.x = Double(cg.x); self.y = Double(cg.y) }
-    var cgPoint: CGPoint { CGPoint(x: x, y: y) }
+struct Constellation: Identifiable {
+    let id: String
+    let userId: String
+    let name: String
+    let equations: [String]
+    let isShared: Bool
 }
 
-struct Constellation: Codable, Identifiable {
-    let id: String
-    let userid: String?
-    let name: String
-    let stars: [SerializablePoint]?            // saved target star positions (preferred)
-    let successfulLines: [[[String: Double]]]? // optional full lines
-    let equations: [String]?                   // old-style or fallback (strings)
-    let successfulEquations: [String]?         // actual math equations user solved
-    let isShared: Bool?
-    let createdAt: String?
-    let updatedAt: String?
-}
 func get_document_for_user(rowId: String) async -> Constellation? {
     do {
         let document = try await appwrite.table.getRow(
@@ -162,18 +157,10 @@ func get_document_for_user(rowId: String) async -> Constellation? {
             tableId: tableID,
             rowId: rowId
         )
-        
-        let userId = (document.data["userid"] as? AnyCodable)?.value as? String ?? "unknown"
-        let isShared = (document.data["isShared"] as? AnyCodable)?.value as? Bool ?? false
-        
-        // --- START: CORRECTED NAME LOGIC ---
-        var name = "Untitled" // Provide a default name
-        if let fetchedName = (document.data["name"] as? AnyCodable)?.value as? String, !fetchedName.isEmpty {
-            // Only use the fetched name if it's a non-empty string
-            name = fetchedName
-        }
-        print("Fetched name: '\(name)' for document ID: \(document.id)")
-        // --- END: CORRECTED NAME LOGIC ---
+
+        let rawName = (document.data["name"] as? AnyCodable)?.value as? String ?? ""
+        let safeName = rawName.trimmingCharacters(in: .whitespacesAndNewlines)
+        let name = safeName.isEmpty ? "Untitled" : safeName
 
         var equations: [String] = []
         if let anyEquations = document.data["equations"] as? AnyCodable {
@@ -183,18 +170,13 @@ func get_document_for_user(rowId: String) async -> Constellation? {
                 equations = [single]
             }
         }
-        
+
         return Constellation(
             id: document.id,
-            userid: userId,
-            name: name, // Use the corrected name variable here
-            stars: nil,
-            successfulLines: nil,
+            userId: (document.data["userid"] as? AnyCodable)?.value as? String ?? "unknown",
+            name: name,
             equations: equations,
-            successfulEquations: nil,
-            isShared: isShared,
-            createdAt: nil,
-            updatedAt: nil
+            isShared: (document.data["isShared"] as? AnyCodable)?.value as? Bool ?? false
         )
 
     } catch {
@@ -207,54 +189,6 @@ func get_document_for_user(rowId: String) async -> Constellation? {
 
 
 
-
-
-
-//func get_document_for_user(rowId: String) async -> Constellation? {
-//    do {
-//        let document = try await appwrite.table.getRow(
-//            databaseId: databaseID,
-//            tableId: tableID,
-//            rowId: rowId
-//        )
-//        
-//        let userId = (document.data["userid"] as? AnyCodable)?.value as? String ?? "unknown"
-//        let isShared = (document.data["isShared"] as? AnyCodable)?.value as? Bool ?? false
-//        let name = (document.data["name"] as? AnyCodable)?.value as? String ?? "Untitled"
-//        print(name) // "Why" or "Untitled" if nil
-//
-//        
-//        var equations: [String] = []
-//        if let anyEquations = document.data["equations"] as? AnyCodable {
-//            if let arr = anyEquations.value as? [String] {
-//                equations = arr
-//            } else if let single = anyEquations.value as? String {
-//                equations = [single]
-//            }
-//        }
-//        
-//        return Constellation(
-//            id: document.id,
-//            userid: userId,
-//            name: name,
-//            stars: nil,
-//            successfulLines: nil,
-//            equations: equations,
-//            successfulEquations: nil,
-//            isShared: isShared,
-//            createdAt: nil,
-//            updatedAt: nil
-//        )
-//
-//    } catch {
-//        print("Error fetching document: \(error.localizedDescription)")
-//        return nil
-//    }
-//}
-//
-//
-//
-//
 func checkIfUserHasDocument() async -> Bool {
     await list_document_for_user()   // updates userTableIDs
     

@@ -13,6 +13,8 @@ struct CustomConstellationView: View {
     @State private var editingIndex: Int? = nil // nil = new, else edit mode
     @State private var isSidebarCollapsed = false
     @State private var showSaveModal = false // Save modal
+    @State private var constellationName: String = ""
+
 
     @Environment(\.presentationMode) var presentationMode
     let ID: String
@@ -44,8 +46,9 @@ struct CustomConstellationView: View {
                                 successfulLines: successfulLines,
                                 equations: arrayOfEquations,
                                 ID: ID,
-                                name: "Testing"
+                                name: constellationName
                             )
+
                             .frame(height: geo.size.height * 0.4)
                             .background(Color.black.opacity(0.2))
                             .cornerRadius(12)
@@ -136,17 +139,23 @@ struct CustomConstellationView: View {
                 SaveConstellationModalView(
                     isPresented: $showSaveModal,
                     equations: $arrayOfEquations,
+                    existingName: constellationName
                 )
             }
+
 
             .onAppear {
                 Task {
                     if let constellation: Constellation = await get_document_for_user(rowId: ID) {
-                        self.arrayOfEquations = constellation.equations ?? []
-                        
-                        print(arrayOfEquations)
-                    }   }
+                        self.arrayOfEquations = constellation.equations
+                        self.constellationName = constellation.name   // <-- THE MISSING LINE
+                       //TESTING
+                        print("Loaded name:", constellation.name)
+
+                    }
+                }
             }
+
             // Auto-update canvas whenever equations change
             .onChange(of: arrayOfEquations) { _ in
                 updateStarsFromEquations()
@@ -156,14 +165,21 @@ struct CustomConstellationView: View {
     }
     // MARK: - Update stars from equations
     private func updateStarsFromEquations() {
-        var allPoints: [(x: Double, y: Double)] = []
+        stars = []
+        successfulLines = []
+
         for eq in arrayOfEquations {
             let engine = MathEngine(equation: eq)
-            let points = engine.evaluate() ?? []
-            allPoints.append(contentsOf: points)    }
-        stars = allPoints.map { CGPoint(x: $0.x, y: $0.y) }
-        successfulLines = allPoints.chunked(into: 2)
+            guard let points = engine.evaluate(), !points.isEmpty else { continue }
+
+            // Add points to stars
+            stars.append(contentsOf: points.map { CGPoint(x: $0.x, y: $0.y) })
+
+            // Each equation is one "line"
+            successfulLines.append(points)
+        }
     }
+
 }
 // MARK: - Sidebar
 private struct CustomSidebarView: View {
