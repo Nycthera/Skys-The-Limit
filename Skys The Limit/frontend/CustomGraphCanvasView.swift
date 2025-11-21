@@ -33,6 +33,8 @@ struct CustomGraphCanvasView: View {
     private let xRange: ClosedRange<Double> = -10...10
     private let yRange: ClosedRange<Double> = -10...10
     
+    @State private var newConstellationName = ""
+    
     var body: some View {
         GeometryReader { geo in
             ZStack {
