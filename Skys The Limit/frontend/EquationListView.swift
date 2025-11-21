@@ -134,12 +134,15 @@ struct EquationListView: View {
         let starPositions = viewModel.stars.map { star in
             "\(Int(star.x)), \(Int(star.y))"
         }
+        // in saveCompletedConstellation()
+        let starPayload = viewModel.stars.map { ["x": Double($0.x), "y": Double($0.y)] }
 
-        // Upload to Appwrite
+        // Current backend signature only supports equations + name:
         await post_to_database(
-            equations: starPositions,
+            equations: equationStrings,
             name: newConstellationName
         )
+
     }
     
     private struct SidebarView: View {

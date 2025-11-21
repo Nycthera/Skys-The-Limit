@@ -135,13 +135,27 @@ func get_shared_document(rowId: String) async {
 
 /// Fetches the first document belonging to the current user
 /// and prints/returns its contents.
-struct Constellation: Identifiable {
-    let id: String
-    let userId: String
-    let name: String
-    let equations: [String]
-    let isShared: Bool
+struct SerializablePoint: Codable {
+    let x: Double
+    let y: Double
+    init(x: Double, y: Double) { self.x = x; self.y = y }
+    init(_ cg: CGPoint) { self.x = Double(cg.x); self.y = Double(cg.y) }
+    var cgPoint: CGPoint { CGPoint(x: x, y: y) }
 }
+
+struct Constellation: Codable, Identifiable {
+    let id: String
+    let userid: String?
+    let name: String
+    let stars: [SerializablePoint]?            // saved target star positions (preferred)
+    let successfulLines: [[[String: Double]]]? // optional full lines
+    let equations: [String]?                   // old-style or fallback (strings)
+    let successfulEquations: [String]?         // actual math equations user solved
+    let isShared: Bool?
+    let createdAt: String?
+    let updatedAt: String?
+}
+
 
 
 func get_document_for_user(rowId: String) async -> Constellation? {
@@ -169,10 +183,15 @@ func get_document_for_user(rowId: String) async -> Constellation? {
         
         return Constellation(
             id: document.id,
-            userId: userId,
+            userid: userId,
             name: name,
+            stars: nil,
+            successfulLines: nil,
             equations: equations,
-            isShared: isShared
+            successfulEquations: nil,
+            isShared: isShared,
+            createdAt: nil,
+            updatedAt: nil
         )
 
     } catch {
