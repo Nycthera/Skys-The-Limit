@@ -9,19 +9,16 @@ enum KeyType {
 // MARK: - Math Key
 struct MathKey: Identifiable, Hashable {
     let id = UUID()
-    let display: String   // What is shown on the button
-    let mathValue: String // Used in MathEngine
+    let display: String
+    let mathValue: String
     let type: KeyType
-    // removed `width: GridItem.Size` because GridItem.Size is NOT Hashable
 }
 
 // MARK: - Math Keyboard View
 struct MathKeyboardView: View {
-
     @Binding var latexString: String
     @Binding var mathString: String
-
-    // MARK: - Keyboard Layout
+    
     private let keyboardRows: [[MathKey]] = [
         [
             MathKey(display: "1", mathValue: "1", type: .character),
@@ -51,54 +48,78 @@ struct MathKeyboardView: View {
             MathKey(display: "-", mathValue: "-", type: .character),
             MathKey(display: "=", mathValue: "=", type: .character),
             MathKey(display: "<", mathValue: "<", type: .character),
-            MathKey(display: ">", mathValue: ">", type: .character)
+            MathKey(display: ">", mathValue: ">", type: .character),
+            MathKey(display: "{", mathValue: "{", type: .character),
+            MathKey(display: "}", mathValue: "}", type: .character)
         ]
     ]
-
-    // MARK: - Body
+    
     var body: some View {
-        VStack(spacing: 12) {
-            ForEach(keyboardRows, id: \.self) { row in
-                HStack(spacing: 8) {
-                    ForEach(row) { key in
-                        Button(action: { handleKeyPress(key) }) {
-                            ZStack {
-                                RoundedRectangle(cornerRadius: 12)
-                                    .fill(key.type == .backspace
-                                          ? Color.red.opacity(0.75)
-                                          : Color.white.opacity(0.12))
-                                    .shadow(color: Color.black.opacity(0.25), radius: 2, x: 0, y: 1)
-
+        GeometryReader { geo in
+            let spacing: CGFloat = 8
+            let maxKeysInRow = keyboardRows.map { $0.count }.max() ?? 1
+            let totalSpacing = spacing * CGFloat(maxKeysInRow - 1)
+            let keyWidth = (geo.size.width - totalSpacing - 24) / CGFloat(maxKeysInRow)
+            
+            VStack(spacing: spacing) {
+                ForEach(keyboardRows, id: \.self) { row in
+                    HStack(spacing: spacing) {
+                        ForEach(row) { key in
+                            Button(action: { handleKeyPress(key) }) {
                                 Text(key.display)
                                     .font(.system(size: 20, weight: .semibold))
-                                    .foregroundColor(.white)
+                                    .foregroundColor(key.type == .backspace ? .white : .primary.opacity(0.9))
+                                    .frame(width: keyWidth, height: 56)
+                                    .background(
+                                        ZStack {
+                                            // Liquid glass effect
+                                            RoundedRectangle(cornerRadius: 16)
+                                                .fill(
+                                                    LinearGradient(
+                                                        gradient: Gradient(colors: key.type == .backspace ? [Color.red.opacity(0.9), Color.red.opacity(0.6)] : [Color.white.opacity(0.25), Color.white.opacity(0.05)]),
+                                                        startPoint: .topLeading,
+                                                        endPoint: .bottomTrailing
+                                                    )
+                                                )
+                                                .background(.ultraThinMaterial)
+                                                .shadow(color: Color.black.opacity(0.2), radius: 4, x: 0, y: 2)
+                                            
+                                            RoundedRectangle(cornerRadius: 16)
+                                                .stroke(Color.white.opacity(0.3), lineWidth: 1)
+                                        }
+                                    )
+                                    .contentShape(RoundedRectangle(cornerRadius: 16))
                             }
-                            .frame(height: 52)
                             .accessibilityLabel(accessibilityLabel(for: key))
+                        }
+                        if row.count < maxKeysInRow {
+                            ForEach(0..<(maxKeysInRow - row.count), id: \.self) { _ in
+                                Spacer()
+                                    .frame(width: keyWidth)
+                            }
                         }
                     }
                 }
             }
+            .padding(12)
+            .background(.ultraThinMaterial)
+            .cornerRadius(24)
+            .padding(.horizontal, 12)
         }
-        .padding(12)
-        .background(.ultraThinMaterial)
-        .cornerRadius(18)
-        .padding(.horizontal, 10)
+        .frame(height: 260)
     }
-
-    // MARK: - Key Press Logic
+    
     private func handleKeyPress(_ key: MathKey) {
         switch key.type {
         case .character:
             latexString += key.display
             mathString += key.mathValue
-
         case .backspace:
             if !latexString.isEmpty { latexString.removeLast() }
             if !mathString.isEmpty { mathString.removeLast() }
         }
     }
-
+    
     private func accessibilityLabel(for key: MathKey) -> String {
         switch key.type {
         case .backspace: return "Backspace"

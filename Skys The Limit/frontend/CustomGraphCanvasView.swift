@@ -70,43 +70,61 @@ struct CustomGraphCanvasView: View {
                             starPath.addLine(to: p)
                         }
                         
+                        // Draw the full line in yellow
                         context.stroke(
                             starPath,
                             with: .color(.yellow),
                             style: StrokeStyle(lineWidth: 3, lineCap: .round, lineJoin: .round)
+                        )
+                        
+                        // Draw dots only at start and end
+                        let dotRadius: CGFloat = 5
+                        let startPoint = first
+                        let endPoint = scalePoint((Double(stars.last!.x), Double(stars.last!.y)), xScale, yScale)
+                        
+                        context.fill(
+                            Circle().path(in: CGRect(x: startPoint.x - dotRadius, y: startPoint.y - dotRadius, width: dotRadius*2, height: dotRadius*2)),
+                            with: .color(.white)
+                        )
+                        
+                        context.fill(
+                            Circle().path(in: CGRect(x: endPoint.x - dotRadius, y: endPoint.y - dotRadius, width: dotRadius*2, height: dotRadius*2)),
+                            with: .color(.white)
                         )
                     }
                     
                     // Draw completed equation lines
                     for (lineIndex, line) in successfulLines.enumerated() {
                         guard line.first != nil else { continue }
-                        
+
                         let starA = stars[lineIndex]
                         let starB = stars[lineIndex + 1]
-                        
+
                         let minX = min(starA.x, starB.x)
                         let maxX = max(starA.x, starB.x)
                         let minY = min(starA.y, starB.y)
                         let maxY = max(starA.y, starB.y)
-                        
+
                         let filteredLine = line.filter { p in
                             (minX...maxX).contains(p.x) && (minY...maxY).contains(p.y)
                         }
-                        
+
                         if !filteredLine.isEmpty {
                             var path = Path()
                             path.move(to: scalePoint(filteredLine.first!, xScale, yScale))
                             for point in filteredLine.dropFirst() {
                                 path.addLine(to: scalePoint(point, xScale, yScale))
                             }
-                            
+
+                            // <-- CHANGE .cyan TO .yellow
                             context.stroke(
                                 path,
-                                with: .color(.cyan),
+                                with: .color(.yellow),
                                 style: StrokeStyle(lineWidth: 3, lineCap: .round)
                             )
                         }
                     }
+
                 }
                 .background(Color.black.opacity(0.7))
                 .cornerRadius(12)
@@ -125,7 +143,7 @@ struct CustomGraphCanvasView: View {
                     .allowsHitTesting(false)
                 }
                 
-                // ------------------ Stars Layer ------------------
+                // ------------------ Stars Layer (clickable info) ------------------
                 ForEach(Array(stars.enumerated()), id: \.offset) { index, star in
                     let padding: CGFloat = 15
                     let xScale = (geo.size.width - 2 * padding) / CGFloat(xRange.upperBound - xRange.lowerBound)
@@ -140,7 +158,7 @@ struct CustomGraphCanvasView: View {
                             selectedStarIndex = index
                         } label: {
                             Circle()
-                                .fill(Color.white.opacity(0.8))
+                                .fill(Color.clear) // removed intermediate white dots
                                 .frame(width: 10, height: 10)
                         }
                         
