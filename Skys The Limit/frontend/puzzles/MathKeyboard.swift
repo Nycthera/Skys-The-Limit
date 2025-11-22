@@ -18,41 +18,43 @@ struct MathKey: Identifiable, Hashable {
 struct MathKeyboardView: View {
     @Binding var latexString: String
     @Binding var mathString: String
-    
-    private let keyboardRows: [[MathKey]] = [
-        [
-            MathKey(display: "1", mathValue: "1", type: .character),
-            MathKey(display: "2", mathValue: "2", type: .character),
-            MathKey(display: "3", mathValue: "3", type: .character)
-        ],
-        [
-            MathKey(display: "4", mathValue: "4", type: .character),
-            MathKey(display: "5", mathValue: "5", type: .character),
-            MathKey(display: "6", mathValue: "6", type: .character),
-            MathKey(display: "x", mathValue: "x", type: .character),
-            MathKey(display: "y", mathValue: "y", type: .character)
-        ],
-        [
-            MathKey(display: "7", mathValue: "7", type: .character),
-            MathKey(display: "8", mathValue: "8", type: .character),
-            MathKey(display: "9", mathValue: "9", type: .character),
-            MathKey(display: "0", mathValue: "0", type: .character),
-            MathKey(display: ".", mathValue: ".", type: .character),
-            MathKey(display: "/", mathValue: "/", type: .character)
-        ],
-        [
-            MathKey(display: "x²", mathValue: "^2", type: .character),
-            MathKey(display: "√", mathValue: "sqrt(", type: .character),
-            MathKey(display: "⌫", mathValue: "", type: .backspace),
-            MathKey(display: "+", mathValue: "+", type: .character),
-            MathKey(display: "-", mathValue: "-", type: .character),
-            MathKey(display: "=", mathValue: "=", type: .character),
-            MathKey(display: "<", mathValue: "<", type: .character),
-            MathKey(display: ">", mathValue: ">", type: .character),
-            MathKey(display: "{", mathValue: "{", type: .character),
-            MathKey(display: "}", mathValue: "}", type: .character)
+        
+        private let keyboardRows: [[MathKey]] = [
+            [
+                MathKey(display: "1", mathValue: "1", type: .character),
+                MathKey(display: "2", mathValue: "2", type: .character),
+                MathKey(display: "3", mathValue: "3", type: .character),
+                
+                MathKey(display: "+", mathValue: "+", type: .character),
+                MathKey(display: "-", mathValue: "-", type: .character)
+            ],
+            [
+                MathKey(display: "4", mathValue: "4", type: .character),
+                MathKey(display: "5", mathValue: "5", type: .character),
+                MathKey(display: "6", mathValue: "6", type: .character),
+                
+                MathKey(display: ".", mathValue: ".", type: .character),
+                MathKey(display: "/", mathValue: "/", type: .character)
+            ],
+            [
+                MathKey(display: "7", mathValue: "7", type: .character),
+                MathKey(display: "8", mathValue: "8", type: .character),
+                MathKey(display: "9", mathValue: "9", type: .character),
+                
+                MathKey(display: "<", mathValue: "<", type: .character),
+                MathKey(display: ">", mathValue: ">", type: .character),
+            ],
+            [
+                MathKey(display: "x", mathValue: "x", type: .character),
+                MathKey(display: "0", mathValue: "0", type: .character),
+                MathKey(display: "y", mathValue: "y", type: .character),
+              
+    //            MathKey(display: "=", mathValue: "=", type: .character),for the inequalities
+                MathKey(display: "{", mathValue: "{", type: .character),
+                MathKey(display: "}", mathValue: "}", type: .character),
+                MathKey(display: "⌫", mathValue: "", type: .backspace)
+            ]
         ]
-    ]
     
     var body: some View {
         GeometryReader { geo in
