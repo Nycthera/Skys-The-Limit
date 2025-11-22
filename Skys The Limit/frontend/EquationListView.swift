@@ -15,7 +15,7 @@ struct EquationListView: View {
     //saving constellation
     @State private var showSaveModal = false
     @State private var newConstellationName = ""
-
+    
     
     
     var body: some View {
@@ -89,22 +89,23 @@ struct EquationListView: View {
                         isCelebrating = false
                         showSaveModal = true    // << PRESENT SAVE MODAL
                     }
-
+                    
                     .zIndex(20)
                     .sheet(isPresented: $showSaveModal) {
                         SaveConstellationModalView(
                             isPresented: $showSaveModal,
                             equations: $viewModel.successfulEquations,
                             existingName: newConstellationName,
+                            docID: nil,  // <-- optional
                             onSave: {
                                 Task {
                                     await saveCompletedConstellation()
-                                    goHome = true        // go home *after saving*
+                                    goHome = true
                                 }
                             }
                         )
                     }
-
+                    
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .background(Color.black.opacity(0.5))  // ensures ZStack fills space
@@ -130,20 +131,20 @@ struct EquationListView: View {
     func saveCompletedConstellation() async {
         // Convert CGPoint → dictionary format
         let equationStrings = viewModel.successfulEquations
-
+        
         // Convert stars to arrays of [x,y]
         let starPositions = viewModel.stars.map { star in
             "\(Int(star.x)), \(Int(star.y))"
         }
         // in saveCompletedConstellation()
         let starPayload = viewModel.stars.map { ["x": Double($0.x), "y": Double($0.y)] }
-
+        
         // Current backend signature only supports equations + name:
         await post_to_database(
             equations: equationStrings,
             name: newConstellationName
         )
-
+        
     }
     
     private struct SidebarView: View {

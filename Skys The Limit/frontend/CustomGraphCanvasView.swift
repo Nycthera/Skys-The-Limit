@@ -24,8 +24,8 @@ struct CustomGraphCanvasView: View {
     let stars: [CGPoint]
     let successfulLines: [[(x: Double, y: Double)]]
     let equations: [String]
-    let ID: String
-    let name: String?   // <-- new optional property
+    let ID: String?        // <-- optional
+    let name: String?      // optional
     
     // Local states
     @State private var selectedStarCoordinates: String? = nil
@@ -43,26 +43,44 @@ struct CustomGraphCanvasView: View {
                 // ------------------ Canvas Layer ------------------
                 Canvas { context, size in
                     
-                    let xScale = size.width / CGFloat(xRange.upperBound - xRange.lowerBound)
-                    let yScale = size.height / CGFloat(yRange.upperBound - yRange.lowerBound)
+                    let padding: CGFloat = 15 // prevent clipping
+                    let xScale = (size.width - 2 * padding) / CGFloat(xRange.upperBound - xRange.lowerBound)
+                    let yScale = (size.height - 2 * padding) / CGFloat(yRange.upperBound - yRange.lowerBound)
                     
                     context.translateBy(x: size.width / 2, y: size.height / 2)
                     
-                    drawGrid(context: context, size: size, xScale: xScale, yScale: yScale)
+                    drawGrid(context: context, size: size, xScale: xScale, yScale: yScale, padding: padding)
                     
                     // Draw axes
                     var axes = Path()
-                    axes.move(to: CGPoint(x: -size.width/2, y: 0))
-                    axes.addLine(to: CGPoint(x: size.width/2, y: 0))
-                    axes.move(to: CGPoint(x: 0, y: -size.height/2))
-                    axes.addLine(to: CGPoint(x: 0, y: size.height/2))
+                    axes.move(to: CGPoint(x: -size.width/2 + padding, y: 0))
+                    axes.addLine(to: CGPoint(x: size.width/2 - padding, y: 0))
+                    axes.move(to: CGPoint(x: 0, y: -size.height/2 + padding))
+                    axes.addLine(to: CGPoint(x: 0, y: size.height/2 - padding))
                     context.stroke(axes, with: .color(.white.opacity(0.7)), lineWidth: 2)
                     
-                    // Draw completed lines
-                    for (lineIndex, line) in successfulLines.enumerated() {
-                        guard let first = line.first else { continue }
+                    // ------------------ Connect Stars ------------------
+                    if stars.count > 1 {
+                        var starPath = Path()
+                        let first = scalePoint((Double(stars[0].x), Double(stars[0].y)), xScale, yScale)
+                        starPath.move(to: first)
                         
-                        // Determine line segment bounds
+                        for i in 1..<stars.count {
+                            let p = scalePoint((Double(stars[i].x), Double(stars[i].y)), xScale, yScale)
+                            starPath.addLine(to: p)
+                        }
+                        
+                        context.stroke(
+                            starPath,
+                            with: .color(.yellow),
+                            style: StrokeStyle(lineWidth: 3, lineCap: .round, lineJoin: .round)
+                        )
+                    }
+                    
+                    // Draw completed equation lines
+                    for (lineIndex, line) in successfulLines.enumerated() {
+                        guard line.first != nil else { continue }
+                        
                         let starA = stars[lineIndex]
                         let starB = stars[lineIndex + 1]
                         
@@ -81,9 +99,11 @@ struct CustomGraphCanvasView: View {
                             for point in filteredLine.dropFirst() {
                                 path.addLine(to: scalePoint(point, xScale, yScale))
                             }
-                            context.stroke(path,
-                                           with: .color(.cyan),
-                                           style: StrokeStyle(lineWidth: 3, lineCap: .round)
+                            
+                            context.stroke(
+                                path,
+                                with: .color(.cyan),
+                                style: StrokeStyle(lineWidth: 3, lineCap: .round)
                             )
                         }
                     }
@@ -91,23 +111,25 @@ struct CustomGraphCanvasView: View {
                 .background(Color.black.opacity(0.7))
                 .cornerRadius(12)
                 
+                // ------------------ Name Label ------------------
                 if let name {
-                        VStack {
-                            Text(name)
-                                .font(.custom("SpaceMono-Bold", size: 24))
-                                .foregroundColor(.yellow)
-                                .shadow(radius: 3)
-                                .padding(.top, 8)
-                            Spacer() // pushes name to top
-                        }
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                        .allowsHitTesting(false) // ensures it doesn’t block star taps
+                    VStack {
+                        Text(name)
+                            .font(.custom("SpaceMono-Bold", size: 24))
+                            .foregroundColor(.yellow)
+                            .shadow(radius: 3)
+                            .padding(.top, 8)
+                        Spacer()
                     }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .allowsHitTesting(false)
+                }
                 
                 // ------------------ Stars Layer ------------------
                 ForEach(Array(stars.enumerated()), id: \.offset) { index, star in
-                    let xScale = geo.size.width / CGFloat(xRange.upperBound - xRange.lowerBound)
-                    let yScale = geo.size.height / CGFloat(yRange.upperBound - yRange.lowerBound)
+                    let padding: CGFloat = 15
+                    let xScale = (geo.size.width - 2 * padding) / CGFloat(xRange.upperBound - xRange.lowerBound)
+                    let yScale = (geo.size.height - 2 * padding) / CGFloat(yRange.upperBound - yRange.lowerBound)
                     let p = scalePoint((Double(star.x), Double(star.y)), xScale, yScale)
                     
                     let screenX = p.x + geo.size.width / 2
@@ -139,6 +161,9 @@ struct CustomGraphCanvasView: View {
         .onAppear {
             print("CustomGraphCanvasView appeared.")
             print("Equations passed:", equations)
+            if let ID {
+                print("Document ID:", ID)
+            }
         }
     }
     
@@ -151,21 +176,21 @@ struct CustomGraphCanvasView: View {
     }
     
     // MARK: - Draw Grid
-    private func drawGrid(context: GraphicsContext, size: CGSize, xScale: CGFloat, yScale: CGFloat) {
+    private func drawGrid(context: GraphicsContext, size: CGSize, xScale: CGFloat, yScale: CGFloat, padding: CGFloat) {
         var grid = Path()
         
         // Vertical lines
         for x in Int(xRange.lowerBound)...Int(xRange.upperBound) {
             let px = CGFloat(x) * xScale
-            grid.move(to: CGPoint(x: px, y: -size.height/2))
-            grid.addLine(to: CGPoint(x: px, y: size.height/2))
+            grid.move(to: CGPoint(x: px, y: -size.height/2 + padding))
+            grid.addLine(to: CGPoint(x: px, y: size.height/2 - padding))
         }
         
         // Horizontal lines
         for y in Int(yRange.lowerBound)...Int(yRange.upperBound) {
             let py = CGFloat(y) * yScale
-            grid.move(to: CGPoint(x: -size.width/2, y: -py))
-            grid.addLine(to: CGPoint(x: size.width/2, y: -py))
+            grid.move(to: CGPoint(x: -size.width/2 + padding, y: -py))
+            grid.addLine(to: CGPoint(x: size.width/2 - padding, y: -py))
         }
         
         context.stroke(grid, with: .color(.gray.opacity(0.2)), lineWidth: 1)
