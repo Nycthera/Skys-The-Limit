@@ -11,14 +11,18 @@ struct SaveConstellationModalView: View {
     @State private var constellationName: String = ""
     @State private var isShared: Bool = false
     
+    
     var onSave: (() -> Void)? = nil
+    var onCancel: (() -> Void)? = nil
     
     init(
         isPresented: Binding<Bool>,
         equations: Binding<[String]>,
         existingName: String,
         docID: String? = nil,
-        onSave: (() -> Void)? = nil
+        onSave: (() -> Void)? = nil,
+        onCancel: (() -> Void)? = nil
+
     ) {
         self._isPresented = isPresented
         self._equations = equations
@@ -26,6 +30,7 @@ struct SaveConstellationModalView: View {
         self._constellationName = State(initialValue: existingName)
         self.docID = docID
         self.onSave = onSave
+        self.onCancel = onCancel
     }
 
     
@@ -52,6 +57,7 @@ struct SaveConstellationModalView: View {
                 HStack(spacing: 20) {
                     Button("Cancel") {
                         isPresented = false
+                        onCancel?()
                     }
                     .font(.custom("SpaceMono-Regular", size: 22)) // increased from 18
                     .frame(maxWidth: .infinity)

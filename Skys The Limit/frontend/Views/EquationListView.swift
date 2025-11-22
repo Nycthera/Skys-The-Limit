@@ -96,13 +96,21 @@ struct EquationListView: View {
                             isPresented: $showSaveModal,
                             equations: $viewModel.successfulEquations,
                             existingName: newConstellationName,
-                            docID: nil,  // <-- optional
+                            docID: nil,
                             onSave: {
                                 Task {
                                     await saveCompletedConstellation()
                                     goHome = true
                                 }
-                            }
+                            },
+                            onCancel: {
+                                Task {
+                                    await saveCompletedConstellation()
+                                    goHome = true
+                                }
+                            },
+                            
+                            
                         )
                     }
                     
