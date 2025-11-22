@@ -17,7 +17,7 @@ struct SaveConstellationModalView: View {
         isPresented: Binding<Bool>,
         equations: Binding<[String]>,
         existingName: String,
-        docID: String? = nil,    // <-- optional now
+        docID: String? = nil,
         onSave: (() -> Void)? = nil
     ) {
         self._isPresented = isPresented
@@ -31,34 +31,34 @@ struct SaveConstellationModalView: View {
     
     var body: some View {
         NavigationView {
-            VStack(spacing: 20) {
+            VStack(spacing: 25) {
                 Text("Save Constellation")
-                    .font(.custom("SpaceMono-Bold", size: 24))
-                    .padding(.top, 20)
+                    .font(.custom("SpaceMono-Bold", size: 32)) // increased from 24
+                    .padding(.top, 25)
                 
                 TextField("Enter constellation name", text: $constellationName)
                     .textFieldStyle(RoundedBorderTextFieldStyle())
                     .padding(.horizontal)
-                    .font(.custom("SpaceMono-Regular", size: 18))
+                    .font(.custom("SpaceMono-Regular", size: 22)) // increased from 18
                 
                 Toggle(isOn: $isShared) {
                     Text("Share with others")
-                        .font(.custom("SpaceMono-Regular", size: 18))
+                        .font(.custom("SpaceMono-Regular", size: 22)) // increased from 18
                 }
                 .padding(.horizontal)
                 
                 Spacer()
                 
-                HStack(spacing: 15) {
+                HStack(spacing: 20) {
                     Button("Cancel") {
                         isPresented = false
                     }
-                    .font(.custom("SpaceMono-Regular", size: 18))
+                    .font(.custom("SpaceMono-Regular", size: 22)) // increased from 18
                     .frame(maxWidth: .infinity)
                     .padding()
                     .background(Color.gray.opacity(0.6))
                     .foregroundColor(.white)
-                    .cornerRadius(12)
+                    .cornerRadius(14)
                     
                     Button("Save") {
                         guard !constellationName.isEmpty else { return }
@@ -68,25 +68,24 @@ struct SaveConstellationModalView: View {
                             isPresented = false
                         }
                     }
-                    .font(.custom("SpaceMono-Bold", size: 18))
+                    .font(.custom("SpaceMono-Bold", size: 22)) // increased from 18
                     .frame(maxWidth: .infinity)
                     .padding()
                     .background(Color.blue)
                     .foregroundColor(.white)
-                    .cornerRadius(12)
+                    .cornerRadius(14)
                 }
                 .padding(.horizontal)
-                .padding(.bottom, 20)
+                .padding(.bottom, 25)
             }
             .navigationBarHidden(true)
         }
     }
     
-    // async save function
     private func saveConstellation() async {
         guard !constellationName.isEmpty else { return }
         
-        let rowId = docID ?? deviceID  // fallback if nil
+        let rowId = docID ?? deviceID
         await update_document(
             rowId: rowId,
             equations: equations,
