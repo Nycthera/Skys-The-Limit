@@ -49,7 +49,7 @@ struct MathKeyboardView: View {
                 MathKey(display: "0", mathValue: "0", type: .character),
                 MathKey(display: "y", mathValue: "y", type: .character),
               
-    //            MathKey(display: "=", mathValue: "=", type: .character),for the inequalities
+                MathKey(display: "=", mathValue: "=", type: .character),
                 MathKey(display: "{", mathValue: "{", type: .character),
                 MathKey(display: "}", mathValue: "}", type: .character),
                 MathKey(display: "⌫", mathValue: "", type: .backspace)

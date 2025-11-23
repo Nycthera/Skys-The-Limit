@@ -50,37 +50,6 @@ struct ConstellationView: View {
                 }
                 .padding()
             }
-            
-//            Button {
-//                print("Add pressed")
-//                showModal = true
-//            } label: {
-//                Image(systemName: "plus")
-//                    .font(.system(size: 24))
-//                    .foregroundColor(.white)
-//                    .padding()
-//                    .background(Color.black.opacity(0.6))
-//                    .clipShape(Circle())
-//            }
-//            .padding(20)
-//            .sheet(isPresented: $showModal) {
-//                ConstellationModalView(
-//                    name: $constellationName,
-//                    numberOfStars: Binding(
-//                        get: { numberOfStars.map(String.init) ?? "" },
-//                        set: { newValue in
-//                            let trimmed = newValue.trimmingCharacters(in: .whitespaces)
-//                            if trimmed.isEmpty {
-//                                numberOfStars = nil
-//                            } else if let intVal = Int(trimmed) {
-//                                numberOfStars = intVal
-//                            }
-//                        }
-//                    ),
-//                    isShared: $isShared
-//                )
-//            }
-            
         }
         
         // <-- Full screen cover to show the selected constellation

@@ -12,13 +12,14 @@ struct EquationListView: View {
     @State private var isCelebrating = false
     @State private var goHome = false
     
-    //saving constellation
+    // saving constellation
     @State private var showSaveModal = false
-    @State private var newConstellationName = ""
-    
+    @State private var newConstellationName = ""     // ← FIXED: used as Binding
     
     var body: some View {
         ZStack {
+            
+            // HIDDEN NAV LINK TO HOME
             NavigationLink(destination: MainMenuView(), isActive: $goHome) {
                 EmptyView()
             }
@@ -31,6 +32,7 @@ struct EquationListView: View {
             
             GeometryReader { geometry in
                 HStack(spacing: 0) {
+                    
                     SidebarView(
                         isCollapsed: isSidebarCollapsed,
                         width: geometry.size.width * 0.20,
@@ -47,33 +49,31 @@ struct EquationListView: View {
                 }
                 .toolbar {
                     ToolbarItem(placement: .topBarLeading) {
-                        
                         Button(action: {
                             withAnimation(.easeInOut) {
                                 isSidebarCollapsed.toggle()
                             }
                         }) {
-                            Image(systemName: isSidebarCollapsed
-                                  ? "sidebar.left"
-                                  : "sidebar.left")
-                            .font(.system(size: 30))
-                            .padding(5)
-                            .clipShape(Circle())
-                            .padding(.leading, 6)
+                            Image(systemName: "sidebar.left")
+                                .font(.system(size: 30))
+                                .padding(5)
+                                .clipShape(Circle())
+                                .padding(.leading, 6)
                         }
                     }
                 }
             }
             
+            // ==============================
+            //        PUZZLE COMPLETE
+            // ==============================
             if viewModel.isPuzzleComplete {
                 ZStack {
-                    // CONFETTI LAYER — full screen
                     ConfettiView(isAnimating: $isCelebrating)
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                         .allowsHitTesting(false)
                         .zIndex(10)
                     
-                    // WIN TEXT & TAP HANDLER
                     VStack {
                         Spacer()
                         Text("You Win!")
@@ -86,79 +86,54 @@ struct EquationListView: View {
                     .contentShape(Rectangle())
                     .onTapGesture {
                         isCelebrating = false
-                        showSaveModal = true    // << PRESENT SAVE MODAL
+                        showSaveModal = true   // show modal
                     }
-                    
                     .zIndex(20)
-                    .sheet(isPresented: $showSaveModal) {
-                        SaveConstellationModalView(
-                            isPresented: $showSaveModal,
-                            equations: $viewModel.successfulEquations,
-                            existingName: newConstellationName,
-                            docID: nil,
-                            onSave: {
-                                Task {
-                                    await saveCompletedConstellation()
-                                    goHome = true
-                                }
-                            },
-                            onCancel: {
-                                Task {
-                                    await saveCompletedConstellation()
-                                    goHome = true
-                                }
-                            },
-                            
-                            
-                        )
-                    }
-                    
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .background(Color.black.opacity(0.5))  // ensures ZStack fills space
+                .background(Color.black.opacity(0.5))
                 .onAppear {
-                    // 🎉 START CONFETTI AT THE RIGHT TIME
                     DispatchQueue.main.async {
                         isCelebrating = true
                     }
                 }
-                
-                // Invisible nav trigger
-                NavigationLink(destination: MainMenuView(),
-                               isActive: $goHome) {
-                    EmptyView()
-                }
-                               .hidden()
             }
-            
-            
+        }
+        .sheet(isPresented: $showSaveModal) {
+            SaveConstellationModalView(
+                isPresented: $showSaveModal,
+                equations: $viewModel.successfulEquations,
+                constellationName: $newConstellationName,    // ← FIXED BINDING
+                docID: nil,
+                onSave: {
+                    Task {
+                        await saveCompletedConstellation()
+                        goHome = true
+                    }
+                },
+                onCancel: {
+                    goHome = true
+                }
+            )
         }
     }
     
+    // ==========================================================
+    //                SAVE TO DATABASE FUNCTION
+    // ==========================================================
     func saveCompletedConstellation() async {
-        // Convert CGPoint → dictionary format
         let equationStrings = viewModel.successfulEquations
         
-        // Convert stars to arrays of [x,y]
-        let starPositions = viewModel.stars.map { star in
-            "\(Int(star.x)), \(Int(star.y))"
-        }
-        // in saveCompletedConstellation()
-        let starPayload = viewModel.stars.map { ["x": Double($0.x), "y": Double($0.y)] }
-        
-        // Current backend signature only supports equations + name:
         await post_to_database(
             equations: equationStrings,
-            name: newConstellationName
+            name: newConstellationName   // ← NOW ACTUALLY THE TYPED NAME
         )
-        
     }
     
     
-    
-    
-    
-    // ---------------------------------------------------------------------------
+    // ==========================================================
+    //                     SIDEBAR VIEW
+    // ==========================================================
     private struct SidebarView: View {
         let isCollapsed: Bool
         let width: CGFloat
@@ -214,7 +189,10 @@ struct EquationListView: View {
         }
     }
     
-    // ----------------------------------------------------------------------
+    
+    // ==========================================================
+    //                     GAME AREA VIEW
+    // ==========================================================
     private struct GameAreaView: View {
         @ObservedObject var viewModel: EquationPuzzleViewModel
         @Binding var currentMathString: String
@@ -223,6 +201,7 @@ struct EquationListView: View {
         
         var body: some View {
             VStack(spacing: 15) {
+                
                 if !viewModel.isPuzzleComplete &&
                     viewModel.stars.count > viewModel.currentTargetIndex + 1 {
                     
@@ -257,17 +236,13 @@ struct EquationListView: View {
                     if !isConfirmingLine {
                         viewModel.checkCurrentLineSolution()
                         viewModel.updateUserGraph()
-                        // First click: turn the button blue and switch text
                         isConfirmingLine = true
                     } else {
-                        // Second click: finalize the line
                         viewModel.checkCurrentLineSolution()
                         viewModel.updateUserGraph()
-                        
-                        // Reset button for next line
                         isConfirmingLine = false
                     }
-                } label:{
+                } label: {
                     Text(isConfirmingLine ? "Confirm Line" : "Check Line")
                         .font(.custom("SpaceMono-Regular", size: 20))
                         .frame(maxWidth: .infinity, minHeight: 10, maxHeight: 20)
@@ -278,7 +253,6 @@ struct EquationListView: View {
                         .cornerRadius(15)
                 }
                 .disabled(viewModel.isPuzzleComplete)
-
             }
         }
     }
