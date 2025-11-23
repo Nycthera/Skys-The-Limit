@@ -3,7 +3,9 @@
 //  Skys The Limit
 //
 //  Created by Chris  on 19/11/25.
-//
+
+// this view is a modal sheet when users want to create a new constellation with the + button in my constellation
+// if i could i would name it CreateConstellationModalView
 
 import SwiftUI
 

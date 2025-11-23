@@ -1,9 +1,4 @@
-//
-//  CustomGraphCanvasView.swift
-//  Skys The Limit
-//
-//  Created by Chris on 19/11/25.
-//
+//This view is only responsible for drawing the constellation. and only that
 
 import Foundation
 import SwiftUI
@@ -24,8 +19,8 @@ struct CustomGraphCanvasView: View {
     let stars: [CGPoint]
     let successfulLines: [[(x: Double, y: Double)]]
     let equations: [String]
-    let ID: String?        // <-- optional
-    let name: String?      // optional
+    let ID: String?
+    let name: String?    
     
     // Local states
     @State private var selectedStarCoordinates: String? = nil

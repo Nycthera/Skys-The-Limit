@@ -1,7 +1,7 @@
+//This view is the main screen that shows all constellations the user created, lets them create new ones, open them, and delete them.
+
 import SwiftUI
 import SwiftMath
-
-//needs to be dismissable
 
 struct ConstellationView: View {
     @State private var showModal = false
@@ -27,6 +27,7 @@ struct ConstellationView: View {
         GridItem(.flexible(minimum: 0, maximum: .infinity), spacing: 16)
     ]
     
+    // this is the Individual constellation cell
     var body: some View {
         ZStack(alignment: .bottomTrailing) {
             
@@ -50,35 +51,36 @@ struct ConstellationView: View {
                 .padding()
             }
             
-            Button {
-                print("Add pressed")
-                showModal = true
-            } label: {
-                Image(systemName: "plus")
-                    .font(.system(size: 24))
-                    .foregroundColor(.white)
-                    .padding()
-                    .background(Color.black.opacity(0.6))
-                    .clipShape(Circle())
-            }
-            .padding(20)
-            .sheet(isPresented: $showModal) {
-                ConstellationModalView(
-                    name: $constellationName,
-                    numberOfStars: Binding(
-                        get: { numberOfStars.map(String.init) ?? "" },
-                        set: { newValue in
-                            let trimmed = newValue.trimmingCharacters(in: .whitespaces)
-                            if trimmed.isEmpty {
-                                numberOfStars = nil
-                            } else if let intVal = Int(trimmed) {
-                                numberOfStars = intVal
-                            }
-                        }
-                    ),
-                    isShared: $isShared
-                )
-            }
+//            Button {
+//                print("Add pressed")
+//                showModal = true
+//            } label: {
+//                Image(systemName: "plus")
+//                    .font(.system(size: 24))
+//                    .foregroundColor(.white)
+//                    .padding()
+//                    .background(Color.black.opacity(0.6))
+//                    .clipShape(Circle())
+//            }
+//            .padding(20)
+//            .sheet(isPresented: $showModal) {
+//                ConstellationModalView(
+//                    name: $constellationName,
+//                    numberOfStars: Binding(
+//                        get: { numberOfStars.map(String.init) ?? "" },
+//                        set: { newValue in
+//                            let trimmed = newValue.trimmingCharacters(in: .whitespaces)
+//                            if trimmed.isEmpty {
+//                                numberOfStars = nil
+//                            } else if let intVal = Int(trimmed) {
+//                                numberOfStars = intVal
+//                            }
+//                        }
+//                    ),
+//                    isShared: $isShared
+//                )
+//            }
+            
         }
         
         // <-- Full screen cover to show the selected constellation
@@ -171,7 +173,7 @@ private struct ConstellationCellView: View {
         .frame(maxWidth: .infinity, minHeight: 150)
         .background(
             RoundedRectangle(cornerRadius: 20, style: .continuous)
-                .fill(Color.white.opacity(0.08))
+                .fill(Color.black.opacity(0.6))
                 .background(
                     RoundedRectangle(cornerRadius: 20, style: .continuous)
                         .fill(.ultraThinMaterial)

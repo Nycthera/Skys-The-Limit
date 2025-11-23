@@ -11,14 +11,18 @@ struct SaveConstellationModalView: View {
     @State private var constellationName: String = ""
     @State private var isShared: Bool = false
     
+    
     var onSave: (() -> Void)? = nil
+    var onCancel: (() -> Void)? = nil
     
     init(
         isPresented: Binding<Bool>,
         equations: Binding<[String]>,
         existingName: String,
         docID: String? = nil,
-        onSave: (() -> Void)? = nil
+        onSave: (() -> Void)? = nil,
+        onCancel: (() -> Void)? = nil
+
     ) {
         self._isPresented = isPresented
         self._equations = equations
@@ -26,6 +30,7 @@ struct SaveConstellationModalView: View {
         self._constellationName = State(initialValue: existingName)
         self.docID = docID
         self.onSave = onSave
+        self.onCancel = onCancel
     }
 
     
@@ -33,17 +38,17 @@ struct SaveConstellationModalView: View {
         NavigationView {
             VStack(spacing: 25) {
                 Text("Save Constellation")
-                    .font(.custom("SpaceMono-Bold", size: 32)) // increased from 24
+                    .font(.custom("SpaceMono-Bold", size: 38)) // increased from 24
                     .padding(.top, 25)
                 
                 TextField("Enter constellation name", text: $constellationName)
                     .textFieldStyle(RoundedBorderTextFieldStyle())
                     .padding(.horizontal)
-                    .font(.custom("SpaceMono-Regular", size: 22)) // increased from 18
+                    .font(.custom("SpaceMono-Regular", size: 38)) // increased from 18
                 
                 Toggle(isOn: $isShared) {
                     Text("Share with others")
-                        .font(.custom("SpaceMono-Regular", size: 22)) // increased from 18
+                        .font(.custom("SpaceMono-Regular", size: 32)) // increased from 18
                 }
                 .padding(.horizontal)
                 
@@ -52,8 +57,9 @@ struct SaveConstellationModalView: View {
                 HStack(spacing: 20) {
                     Button("Cancel") {
                         isPresented = false
+                        onCancel?()
                     }
-                    .font(.custom("SpaceMono-Regular", size: 22)) // increased from 18
+                    .font(.custom("SpaceMono-Regular", size: 28)) // increased from 18
                     .frame(maxWidth: .infinity)
                     .padding()
                     .background(Color.gray.opacity(0.6))
@@ -68,7 +74,7 @@ struct SaveConstellationModalView: View {
                             isPresented = false
                         }
                     }
-                    .font(.custom("SpaceMono-Bold", size: 22)) // increased from 18
+                    .font(.custom("SpaceMono-Bold", size: 28)) // increased from 18
                     .frame(maxWidth: .infinity)
                     .padding()
                     .background(Color.blue)
