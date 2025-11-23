@@ -11,8 +11,8 @@ import JSONCodable
 class Appwrite {
     var client: Client
     var account: Account
-    var database: Databases
     var table: TablesDB
+    var avatars: Avatars
     
     public init() {
         self.client = Client()
@@ -20,8 +20,8 @@ class Appwrite {
             .setProject("690d951a00110f06cd0f")
         
         self.account = Account(client)
-        self.database = Databases(client)
         self.table = TablesDB(client)
+        self.avatars = Avatars(client)
     }
 }
 
