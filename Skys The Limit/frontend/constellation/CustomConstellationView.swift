@@ -17,7 +17,7 @@ struct CustomConstellationView: View {
     @Environment(\.presentationMode) var presentationMode
     let ID: String
     private let sidebarWidth: CGFloat = 250
-
+ 
     var body: some View {
         NavigationView {
             GeometryReader { geo in
@@ -44,10 +44,57 @@ struct CustomConstellationView: View {
                                 name: constellationName,
                                 startEndCoords: startEndCoords
                             )
-                            .frame(height: geo.size.height * 0.9)
+                            .frame(height: geo.size.height * 0.5)
                             .background(Color.black.opacity(0.2))
                             .cornerRadius(12)
                             .layoutPriority(1)
+                            
+                            // current input
+                            
+                            VStack(alignment: .leading, spacing: 5) {
+                                Text("Current Input:")
+                                    .font(.custom("SpaceMono-Bold", size: 24))
+                                    .foregroundColor(.white)
+                                
+                                Text(editingLatexString.isEmpty ? "y = " : editingLatexString)
+                                    .font(.custom("SpaceMono-Regular", size: 24))
+                                    .foregroundColor(.yellow)
+                                    .padding(6)
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                    .background(Color.white.opacity(0.1))
+                                    .cornerRadius(8)
+                            }
+                            .padding(.top, 8)
+                           
+                            MathKeyboardView(
+                                latexString: $editingLatexString,
+                                mathString: $editingMathString
+                            )
+                            .layoutPriority(1)
+                            
+                         
+                            
+                            // Add / Update button
+                            Button {
+                                guard !editingMathString.isEmpty else { return }
+                                if let index = editingIndex {
+                                    arrayOfEquations[index] = editingMathString
+                                } else {
+                                    arrayOfEquations.append(editingMathString)
+                                }
+                                editingLatexString = ""
+                                editingMathString = ""
+                                editingIndex = nil
+                            } label: {
+                                Text(editingIndex != nil ? "Update Equation" : "Add Equation")
+                                    .font(.custom("SpaceMono-Regular", size: 20))
+                                    .frame(maxWidth: .infinity)
+                                    .padding()
+                                    .background(Color.white)
+                                    .foregroundColor(.black)
+                                    .cornerRadius(15)
+                            }
+                            
                         }
                         .padding()
                         .frame(width: geo.size.width - (isSidebarCollapsed ? 0 : sidebarWidth))
