@@ -32,7 +32,6 @@ struct CustomGraphCanvasView: View {
     var body: some View {
         GeometryReader { geo in
             ZStack {
-
                 // ------------------ Canvas Layer ------------------
                 Canvas { context, size in
 

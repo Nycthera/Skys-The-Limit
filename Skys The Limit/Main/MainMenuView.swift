@@ -6,7 +6,7 @@ struct MainMenuView: View {
     var body: some View {
         ZStack(alignment: .top) {
 
-            Image("Space")
+            Image("Home")
                 .resizable()
                 .aspectRatio(contentMode: .fill)
                 .edgesIgnoringSafeArea(.all)
@@ -17,27 +17,41 @@ struct MainMenuView: View {
                     .foregroundColor(.white)
                     .padding(.top, 50)
 
-                Image("Meteor")
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .frame(width: 150, height: 150)
-                    .clipShape(RoundedRectangle(cornerRadius: 25))
-
                 Spacer()
 
                 VStack(alignment: .leading, spacing: 50) {
 
-                    NavigationLink("Draw The Stars", destination: EquationListView())
-                    NavigationLink("My Galaxy", destination: ConstellationView())
-//                    NavigationLink("Turtitoal", destination: TutorialLevelOneView())
-                    // FIXED
-                    NavigationLink(
-                        "Tutorial",
-                        destination: TutorialLevelOneView(isShowingTutorial: $isShowingTutorial)
-                    )
+                    
+                    NavigationLink{
+                        EquationListView()
+                    }label:{
+                        Text("Draw The Stars")
+                            .padding(20)
+                            .background(.white.opacity(0.7))
+                            .clipShape(RoundedRectangle(cornerRadius: 30))
+                    }
+
+                    NavigationLink{
+                        ConstellationView()
+                    }label:{
+                        Text("My Galaxy")
+                            .padding(20)
+                            .background(.white.opacity(0.7))
+                            .clipShape(RoundedRectangle(cornerRadius: 30))
+                    }
+              
+                    NavigationLink{
+                        TutorialLevelOneView(isShowingTutorial: $isShowingTutorial)
+                    }label:{
+                        Text("Tutorial")
+                            .padding(20)
+                            .background(.white.opacity(0.7))
+                            .clipShape(RoundedRectangle(cornerRadius: 30))
+                    }
+                    
                 }
-                .font(.custom("SpaceMono-Regular", size: 35))
-                .foregroundColor(.white)
+                .font(.custom("SpaceMono-Regular", size: 45))
+                .foregroundColor(.black)
 
                 Spacer()
             }

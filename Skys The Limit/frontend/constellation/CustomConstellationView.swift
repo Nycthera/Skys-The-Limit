@@ -51,20 +51,20 @@ struct CustomConstellationView: View {
                             
                             // current input
                             
-                            VStack(alignment: .leading, spacing: 5) {
-                                Text("Current Input:")
-                                    .font(.custom("SpaceMono-Bold", size: 24))
-                                    .foregroundColor(.white)
+                            VStack(alignment: .leading) {
+//                                Text("Current Input:")
+//                                    .font(.custom("SpaceMono-Bold", size: 24))
+//                                    .foregroundColor(.white)
                                 
                                 Text(editingLatexString.isEmpty ? "y = " : editingLatexString)
                                     .font(.custom("SpaceMono-Regular", size: 24))
                                     .foregroundColor(.yellow)
-                                    .padding(6)
+                                    .padding(3)
                                     .frame(maxWidth: .infinity, alignment: .leading)
                                     .background(Color.white.opacity(0.1))
                                     .cornerRadius(8)
                             }
-                            .padding(.top, 8)
+                            .padding(.top, 4)
                            
                             MathKeyboardView(
                                 latexString: $editingLatexString,

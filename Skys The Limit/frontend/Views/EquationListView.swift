@@ -61,6 +61,19 @@ struct EquationListView: View {
                                 .padding(.leading, 6)
                         }
                     }
+                    // if you want the users to immediately solve a puzzle every time they launch the app a bit annoying tho
+//                    ToolbarItem(placement: .navigationBarTrailing) {
+//                        NavigationLink {
+//                            MainMenuView()      // <-- destination
+//                        } label: {
+//                            Text("Back")
+//                                .font(.custom("SpaceMono-Regular", size: 18))
+//                                .padding(5)
+//                                .background(Color.black.opacity(0.5))
+//                                .foregroundColor(.white)
+//                                .cornerRadius(8)
+//                        }
+//                    }
                 }
             }
 
@@ -224,7 +237,7 @@ struct EquationListView: View {
                     viewModel.stars.count > viewModel.currentTargetIndex + 1 {
 
                     Text("Connect Star \(viewModel.currentTargetIndex + 1) → Star \(viewModel.currentTargetIndex + 2)")
-                        .font(.custom("SpaceMono-Regular", size: 20))
+                        .font(.custom("SpaceMono-Regular", size: 35))
                         .foregroundColor(.yellow)
                 }
 
@@ -239,7 +252,7 @@ struct EquationListView: View {
 
                 MathView(
                     equation: viewModel.currentLatexString,
-                    fontSize: 22
+                    fontSize: 40
                 )
                 .frame(maxWidth: .infinity, minHeight: 10, maxHeight: 20)
                 .background(Color.black.opacity(0.5))
@@ -271,6 +284,7 @@ struct EquationListView: View {
                         .cornerRadius(15)
                 }
                 .disabled(viewModel.isPuzzleComplete)
+
             }
         }
     }
