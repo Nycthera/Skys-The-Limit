@@ -12,7 +12,7 @@ struct ContentView: View {
             // It starts by showing the WelcomeView.
             FadeShowView()
         }
-      
+
         .navigationBarHidden(true)
         .navigationViewStyle(.stack)
         .navigationBarBackButtonHidden(true)

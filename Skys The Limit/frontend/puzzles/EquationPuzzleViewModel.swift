@@ -1,29 +1,29 @@
 // What this file does: It stores the game state (stars, lines, equations).
-//It checks if the user entered the correct equation.
-//It updates the line preview while the user types.
-//It decides when the puzzle is solved.
-                
+// It checks if the user entered the correct equation.
+// It updates the line preview while the user types.
+// It decides when the puzzle is solved.
+
 import Foundation
 import CoreGraphics
 import Combine
 import SwiftUI
- 
+
 @MainActor
 class EquationPuzzleViewModel: ObservableObject {
-    //for the animation of the drawing of the line
+    // for the animation of the drawing of the line
     @Published var newLineAdded: Bool = false
-    
+
     // The puzzle state
     @Published var stars: [CGPoint] = []
     @Published var successfulLines: [[(x: Double, y: Double)]] = []
     @Published var successfulEquations: [String] = []
-    //guys this is to differentiate the first second and completed stars
+    // guys this is to differentiate the first second and completed stars
     @Published var connectedStarIndices: Set<Int> = []
-    
+
     // The current user input state
     @Published var currentLatexString: String = "y="
     @Published var currentGraphPoints: [(x: Double, y: Double)] = []
-    
+
     // The game flow state
     @Published var currentTargetIndex: Int = 0
     @Published var isPuzzleComplete: Bool = false
@@ -31,7 +31,7 @@ class EquationPuzzleViewModel: ObservableObject {
     init() {
         generateNewPuzzle()
     }
-    
+
     /// Generates a new set of random stars and resets the game state.
     func generateNewPuzzle(starCount: Int = 2) {
         stars.removeAll()
@@ -39,22 +39,22 @@ class EquationPuzzleViewModel: ObservableObject {
         currentTargetIndex = 0
         isPuzzleComplete = false
         resetCurrentLine()
-        
+
         var usedPoints = Set<CGPoint>()
-        
+
         // Generate the first star normally
         var previousPoint = CGPoint(
             x: Int.random(in: -8...8),
             y: Int.random(in: -8...8)
         )
-        
+
         stars.append(previousPoint)
         usedPoints.insert(previousPoint)
-        
+
         // Generate the rest, ensuring no vertical alignment
         for _ in 1..<starCount {
             var newPoint: CGPoint
-            
+
             repeat {
                 newPoint = CGPoint(
                     x: Int.random(in: -8...8),
@@ -63,13 +63,13 @@ class EquationPuzzleViewModel: ObservableObject {
             } while
                 usedPoints.contains(newPoint) ||
                 abs(newPoint.x - previousPoint.x) < 1   // 👈 avoids vertical line segments
-            
+
             stars.append(newPoint)
             usedPoints.insert(newPoint)
             previousPoint = newPoint
         }
     }
-    
+
     /// Updates the live preview of the user's current equation.
     func updateUserGraph() {
         let engine = MathEngine(equation: currentLatexString)
@@ -81,26 +81,26 @@ class EquationPuzzleViewModel: ObservableObject {
             currentGraphPoints = []
         }
     }
-    
+
     // Checks if the user's current line correctly connects the two target stars.
     func checkCurrentLineSolution() {
         guard stars.count > currentTargetIndex + 1 else { return }
-        
+
         let starA = stars[currentTargetIndex]
         let starB = stars[currentTargetIndex + 1]
         let tolerance = 0.5
-        
+
         let connectsStarA = lineContainsPoint(line: currentGraphPoints, point: starA, tolerance: tolerance)
         let connectsStarB = lineContainsPoint(line: currentGraphPoints, point: starB, tolerance: tolerance)
-        
+
         if connectsStarA && connectsStarB {
             successfulLines.append(currentGraphPoints)
             successfulEquations.append(currentLatexString)
-            
+
             // Mark first star as connected
             connectedStarIndices.insert(currentTargetIndex)
             newLineAdded.toggle()
-            
+
             currentTargetIndex += 1
             if currentTargetIndex >= stars.count - 1 {
                 isPuzzleComplete = true
@@ -108,12 +108,12 @@ class EquationPuzzleViewModel: ObservableObject {
             resetCurrentLine()
         }
     }
-    
+
     private func resetCurrentLine() {
         currentLatexString = "y="
         currentGraphPoints.removeAll()
     }
-    
+
     private func lineContainsPoint(line: [(x: Double, y: Double)], point: CGPoint, tolerance: Double) -> Bool {
         return line.contains { linePoint in
             let dx = linePoint.x - point.x
@@ -121,7 +121,7 @@ class EquationPuzzleViewModel: ObservableObject {
             return sqrt(dx*dx + dy*dy) < tolerance
         }
     }
-    
+
     func generateLinePoints() {
         let engine = MathEngine(equation: currentLatexString)
         // Choose either evaluate() or calculatePoints with desired sampling.
@@ -132,4 +132,3 @@ class EquationPuzzleViewModel: ObservableObject {
         }
     }
 }
-

@@ -38,7 +38,7 @@ struct MainMenuView: View {
                 }
                 .font(.custom("SpaceMono-Regular", size: 35))
                 .foregroundColor(.white)
-                 
+
                 Spacer()
             }
         }

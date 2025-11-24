@@ -8,12 +8,12 @@
 import AVKit
 import SwiftUI
 struct TutorialLevelOneView: View {
-    @Binding var isShowingTutorial : Bool
-    
+    @Binding var isShowingTutorial: Bool
+
     private let VideoFiles = ["Recording-1", "Recording-2", "Recording-3", "HIIII WO AI NI"]
-    
-    var body : some View {
-        VStack{
+
+    var body: some View {
+        VStack {
             TabView {
                 ForEach(VideoFiles, id: \.self) { fileName in
                     if let url = Bundle.main.url(forResource: fileName, withExtension: "mov") {
@@ -38,6 +38,5 @@ struct TutorialLevelOneView: View {
             .padding()
         }
     }
-    
-    
+
 }

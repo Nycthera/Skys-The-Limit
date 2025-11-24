@@ -13,12 +13,12 @@ class Appwrite {
     var account: Account
     var table: TablesDB
     var avatars: Avatars
-    
+
     public init() {
         self.client = Client()
             .setEndpoint("https://sgp.cloud.appwrite.io/v1")
             .setProject("690d951a00110f06cd0f")
-        
+
         self.account = Account(client)
         self.table = TablesDB(client)
         self.avatars = Avatars(client)
@@ -26,6 +26,3 @@ class Appwrite {
 }
 
 let appwrite = Appwrite()
-
-
-

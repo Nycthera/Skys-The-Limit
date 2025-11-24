@@ -4,8 +4,7 @@ import Foundation
 struct EquationLine: Identifiable {
     let id = UUID()
     var latexString: String
-    
-   
+
     // This property is NOT optional. It matches the return type of your
     // original MathEngine's calculatePoints() function.
     var points: [(x: Double, y: Double)] = []

@@ -6,13 +6,13 @@ struct SaveConstellationModalView: View {
     @Binding var equations: [String]
     @Binding var constellationName: String
     @Binding var startEndCords: [String]
-    var docID: String? = nil
+    var docID: String?
     var deviceID = UIDevice.current.identifierForVendor?.uuidString ?? "unknown_device"
 
     @State private var isShared: Bool = false
 
-    var onSave: (() -> Void)? = nil
-    var onCancel: (() -> Void)? = nil
+    var onSave: (() -> Void)?
+    var onCancel: (() -> Void)?
 
     var body: some View {
         NavigationView {

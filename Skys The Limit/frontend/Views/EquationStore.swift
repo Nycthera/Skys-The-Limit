@@ -10,11 +10,11 @@ import SwiftUI
 import Combine
 @MainActor
 class EquationStore: ObservableObject {
-    
+
     @Published var equations: [String] = []
 
     init() { }
-    
+
     // You can build this out later to load saved data from the database.
     func fetchEquations() async {
         print("Fetching equations from database...")

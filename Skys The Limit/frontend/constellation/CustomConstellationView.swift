@@ -8,13 +8,12 @@ struct CustomConstellationView: View {
 
     @State private var editingLatexString: String = ""
     @State private var editingMathString: String = ""
-    @State private var editingIndex: Int? = nil
+    @State private var editingIndex: Int?
     @State private var isSidebarCollapsed = false
     @State private var showSaveModal = false
     @State private var constellationName: String = ""
     @State private var startEndCoords: [String] = [""]
-    
-    
+
     @Environment(\.presentationMode) var presentationMode
     let ID: String
     private let sidebarWidth: CGFloat = 250

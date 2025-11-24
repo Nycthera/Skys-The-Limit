@@ -4,42 +4,42 @@ import SwiftMath
 struct EquationListView: View {
     @StateObject private var viewModel = EquationPuzzleViewModel()
     @EnvironmentObject var equationStore: EquationStore
-    
+
     @State private var currentMathString: String = ""
     @State private var isSidebarCollapsed: Bool = false
-    
+
     // confetti stuff
     @State private var isCelebrating = false
     @State private var goHome = false
-    
+
     // saving constellation
     @State private var showSaveModal = false
     @State private var newConstellationName = ""     // ← FIXED: used as Binding
-    
+
     var body: some View {
         ZStack {
-            
+
             // HIDDEN NAV LINK TO HOME
             NavigationLink(destination: MainMenuView(), isActive: $goHome) {
                 EmptyView()
             }
             .hidden()
-            
+
             Image("Space")
                 .resizable()
                 .aspectRatio(contentMode: .fill)
                 .edgesIgnoringSafeArea(.all)
-            
+
             GeometryReader { geometry in
                 HStack(spacing: 0) {
-                    
+
                     SidebarView(
                         isCollapsed: isSidebarCollapsed,
                         width: geometry.size.width * 0.20,
                         stars: viewModel.stars,
                         successfulEquations: viewModel.successfulEquations
                     )
-                    
+
                     GameAreaView(
                         viewModel: viewModel,
                         currentMathString: $currentMathString,
@@ -63,7 +63,7 @@ struct EquationListView: View {
                     }
                 }
             }
-            
+
             // ==============================
             //        PUZZLE COMPLETE
             // ==============================
@@ -73,7 +73,7 @@ struct EquationListView: View {
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                         .allowsHitTesting(false)
                         .zIndex(10)
-                    
+
                     VStack {
                         Spacer()
                         Text("You Win!")
@@ -121,22 +121,22 @@ struct EquationListView: View {
                 }
             )
         }
-        
+
     }
-    
+
     // ==========================================================
     //                SAVE TO DATABASE FUNCTION
     // ==========================================================
     func saveCompletedConstellation() async {
         let equationStrings = viewModel.successfulEquations
-        
+
         // Auto compute start and end coordinates
         let stars = viewModel.stars
         let startEndCoords: [String] = {
             guard let first = stars.first, let last = stars.last else { return [] }
             return ["\(Int(first.x)),\(Int(first.y))", "\(Int(last.x)),\(Int(last.y))"]
         }()
-        
+
         let parameters = AppwriteFunctionsParameters(
             id: nil,
             userId: UIDevice.current.identifierForVendor?.uuidString ?? "unknown_device",
@@ -145,13 +145,11 @@ struct EquationListView: View {
             isShared: false,
             startEndCords: startEndCoords
         )
-        
+
         await postToDatabase(parameters: parameters)
         print("Saved constellation '\(newConstellationName)' with \(equationStrings.count) equations and start/end coords: \(startEndCoords)")
     }
-    
-    
-    
+
     // ==========================================================
     //                     SIDEBAR VIEW
     // ==========================================================
@@ -160,18 +158,18 @@ struct EquationListView: View {
         let width: CGFloat
         let stars: [CGPoint]
         let successfulEquations: [String]
-        
+
         var body: some View {
             VStack(spacing: 12) {
                 if !isCollapsed {
                     Text("Equations")
                         .font(.custom("SpaceMono-Bold", size: 24))
                         .foregroundColor(.white)
-                    
+
                     Text("Target Coordinates")
                         .font(.custom("SpaceMono-Bold", size: 18))
                         .foregroundColor(.yellow)
-                    
+
                     ForEach(Array(stars.enumerated()), id: \.offset) { index, star in
                         Text("Star \(index + 1): (\(Int(star.x)), \(Int(star.y)))")
                             .font(.custom("SpaceMono-Regular", size: 16))
@@ -181,7 +179,7 @@ struct EquationListView: View {
                             .background(Color.white.opacity(0.05))
                             .cornerRadius(5)
                     }
-                    
+
                     ScrollView {
                         VStack(alignment: .leading, spacing: 8) {
                             ForEach(successfulEquations, id: \.self) { equation in
@@ -198,7 +196,7 @@ struct EquationListView: View {
                         }
                     }
                 }
-                
+
                 Spacer()
             }
             .padding(.vertical)
@@ -209,8 +207,7 @@ struct EquationListView: View {
             .animation(.easeInOut, value: isCollapsed)
         }
     }
-    
-    
+
     // ==========================================================
     //                     GAME AREA VIEW
     // ==========================================================
@@ -219,18 +216,18 @@ struct EquationListView: View {
         @Binding var currentMathString: String
         let canvasHeight: CGFloat
         @State private var isConfirmingLine = false
-        
+
         var body: some View {
             VStack(spacing: 15) {
-                
+
                 if !viewModel.isPuzzleComplete &&
                     viewModel.stars.count > viewModel.currentTargetIndex + 1 {
-                    
+
                     Text("Connect Star \(viewModel.currentTargetIndex + 1) → Star \(viewModel.currentTargetIndex + 2)")
                         .font(.custom("SpaceMono-Regular", size: 20))
                         .foregroundColor(.yellow)
                 }
-                
+
                 GraphCanvasView(
                     stars: viewModel.stars,
                     successfulLines: viewModel.successfulLines,
@@ -239,7 +236,7 @@ struct EquationListView: View {
                     connectedStarIndices: viewModel.connectedStarIndices
                 )
                 .frame(height: canvasHeight)
-                
+
                 MathView(
                     equation: viewModel.currentLatexString,
                     fontSize: 22
@@ -247,12 +244,12 @@ struct EquationListView: View {
                 .frame(maxWidth: .infinity, minHeight: 10, maxHeight: 20)
                 .background(Color.black.opacity(0.5))
                 .cornerRadius(12)
-                
+
                 MathKeyboardView(
                     latexString: $viewModel.currentLatexString,
                     mathString: $currentMathString
                 )
-                
+
                 Button {
                     if !isConfirmingLine {
                         viewModel.checkCurrentLineSolution()

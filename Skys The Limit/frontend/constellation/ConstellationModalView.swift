@@ -5,7 +5,7 @@ struct ConstellationModalView: View {
     @Binding var numberOfStars: String
     @Binding var isShared: Bool
     @Environment(\.dismiss) var dismiss
-    
+
     // Placeholder equations (or could be empty)
     let tempEquations: [String] = []
 
@@ -29,7 +29,7 @@ struct ConstellationModalView: View {
                         Text("Dismiss")
                     }
                 }
-                
+
                 // Done button
                 ToolbarItem(placement: .confirmationAction) {
                     Button {
@@ -37,11 +37,11 @@ struct ConstellationModalView: View {
                         guard !name.isEmpty else { return }
                         Task {
                             // 1. Check if user has any documents
-                            let _ = await checkIfUserHasDocument()
-                            
+                            _ = await checkIfUserHasDocument()
+
                             // 2. Generate a placeholder start/end coordinates (empty for now)
                             let startEndCords: [String] = []
-                            
+
                             // 3. Create parameters struct
                             let parameters = AppwriteFunctionsParameters(
                                 id: nil,
@@ -51,10 +51,10 @@ struct ConstellationModalView: View {
                                 isShared: isShared,
                                 startEndCords: startEndCords
                             )
-                            
+
                             // 4. Save to database
                             await postToDatabase(parameters: parameters)
-                            
+
                             // 5. Dismiss modal
                             dismiss()
                         }

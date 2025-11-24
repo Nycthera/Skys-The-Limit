@@ -7,33 +7,33 @@ import SwiftMath
 struct ConstellationView: View {
     @State private var showModal = false
     @State private var constellationName = ""
-    @State private var numberOfStars: Int? = nil
+    @State private var numberOfStars: Int?
     @State private var isShared = false
-    
+
     // Track selected constellation to show in canvas
-    @State private var selectedConstellation: AppwriteFunctionsParameters? = nil
-    
+    @State private var selectedConstellation: AppwriteFunctionsParameters?
+
     // Store constellation rows from Appwrite
     @State private var constellations: [AppwriteFunctionsParameters] = []
-    
+
     // Delete states
     @State private var showDeleteAlert = false
-    @State private var constellationToDelete: AppwriteFunctionsParameters? = nil
-    
+    @State private var constellationToDelete: AppwriteFunctionsParameters?
+
     let deviceId: String = UIDevice.current.identifierForVendor?.uuidString ?? "unknown_device"
-    
+
     // 2-column flexible grid
     private static let gridColumns: [GridItem] = [
         GridItem(.flexible(minimum: 0, maximum: .infinity), spacing: 16),
         GridItem(.flexible(minimum: 0, maximum: .infinity), spacing: 16)
     ]
-    
+
     var body: some View {
         ZStack(alignment: .bottomTrailing) {
             Image("Space")
                 .resizable()
                 .ignoresSafeArea()
-            
+
             ScrollView {
                 LazyVGrid(columns: Self.gridColumns, spacing: 20) {
                     ForEach(constellations) { constellation in
@@ -50,12 +50,12 @@ struct ConstellationView: View {
                 .padding()
             }
         }
-        
+
         // Full screen cover to show selected constellation
         .fullScreenCover(item: $selectedConstellation) { constellation in
             CustomConstellationView(ID: constellation.id ?? "")
         }
-        
+
         // Delete alert
         .alert("Delete Constellation?", isPresented: $showDeleteAlert) {
             Button("Delete", role: .destructive) {
@@ -70,32 +70,32 @@ struct ConstellationView: View {
         } message: {
             Text("Are you sure you want to delete “\(constellationToDelete?.name ?? "")”?")
         }
-        
+
         .onAppear {
             Task {
                 await loadConstellations()
             }
         }
     }
-    
+
     // MARK: - Load all documents from Appwrite
     func loadConstellations() async {
         await listDocumentsForUser()
-        
+
         var fetched: [AppwriteFunctionsParameters] = []
-        
+
         for id in userTableIds {
             if let doc = await getDocumentForUser(rowId: id) {
                 fetched.append(doc)
             }
         }
-        
+
         // Update UI on main thread
         DispatchQueue.main.async {
             self.constellations = fetched
         }
     }
-    
+
     // MARK: - Delete document
     func deleteConstellation(id: String) async {
         await deleteDocument(rowId: id)

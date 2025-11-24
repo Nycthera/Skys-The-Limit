@@ -4,7 +4,7 @@ struct SaveConstellationModalSheetView: View {
     @Binding var name: String
     var onSubmit: () -> Void
     @Environment(\.dismiss) var dismiss
-     
+
     var body: some View {
         NavigationView {
             Form {
