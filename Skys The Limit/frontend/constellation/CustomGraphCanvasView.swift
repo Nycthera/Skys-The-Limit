@@ -1,5 +1,3 @@
-//This view is only responsible for drawing the constellation. and only that
-
 import Foundation
 import SwiftUI
 
@@ -11,6 +9,7 @@ struct DocFormat: Codable, Identifiable {
     let createdAt: Date?
     let updatedAt: Date?
     let name: String
+    let startEndCoords: [String]
 }
 
 struct CustomGraphCanvasView: View {
@@ -20,7 +19,8 @@ struct CustomGraphCanvasView: View {
     let successfulLines: [[(x: Double, y: Double)]]
     let equations: [String]
     let ID: String?
-    let name: String?    
+    let name: String?
+    let startEndCoords: [String]
     
     // Local states
     @State private var selectedStarCoordinates: String? = nil
@@ -28,8 +28,6 @@ struct CustomGraphCanvasView: View {
     
     private let xRange: ClosedRange<Double> = -10...10
     private let yRange: ClosedRange<Double> = -10...10
-    
-    @State private var newConstellationName = ""
     
     var body: some View {
         GeometryReader { geo in
@@ -54,71 +52,58 @@ struct CustomGraphCanvasView: View {
                     axes.addLine(to: CGPoint(x: 0, y: size.height/2 - padding))
                     context.stroke(axes, with: .color(.white.opacity(0.7)), lineWidth: 2)
                     
-                    // ------------------ Connect Stars ------------------
-                    if stars.count > 1 {
-                        var starPath = Path()
-                        let first = scalePoint((Double(stars[0].x), Double(stars[0].y)), xScale, yScale)
-                        starPath.move(to: first)
-                        
-                        for i in 1..<stars.count {
-                            let p = scalePoint((Double(stars[i].x), Double(stars[i].y)), xScale, yScale)
-                            starPath.addLine(to: p)
-                        }
-                        
-                        // Draw the full line in yellow
-                        context.stroke(
-                            starPath,
-                            with: .color(.yellow),
-                            style: StrokeStyle(lineWidth: 3, lineCap: .round, lineJoin: .round)
-                        )
-                        
-                        // Draw dots only at start and end
-                        let dotRadius: CGFloat = 5
-                        let startPoint = first
-                        let endPoint = scalePoint((Double(stars.last!.x), Double(stars.last!.y)), xScale, yScale)
-                        
-                        context.fill(
-                            Circle().path(in: CGRect(x: startPoint.x - dotRadius, y: startPoint.y - dotRadius, width: dotRadius*2, height: dotRadius*2)),
-                            with: .color(.white)
-                        )
-                        
-                        context.fill(
-                            Circle().path(in: CGRect(x: endPoint.x - dotRadius, y: endPoint.y - dotRadius, width: dotRadius*2, height: dotRadius*2)),
-                            with: .color(.white)
-                        )
-                    }
-                    
-                    // Draw completed equation lines
-                    for (lineIndex, line) in successfulLines.enumerated() {
-                        guard line.first != nil else { continue }
+                    // ------------------ Draw ONLY the line from startEndCoords ------------------
+                    if startEndCoords.count == 2 {
+                        // Parse "x,y" into numbers
+                        let startParts = startEndCoords[0].split(separator: ",")
+                        let endParts = startEndCoords[1].split(separator: ",")
 
-                        let starA = stars[lineIndex]
-                        let starB = stars[lineIndex + 1]
+                        if startParts.count == 2, endParts.count == 2,
+                           let sx = Double(startParts[0]),
+                           let sy = Double(startParts[1]),
+                           let ex = Double(endParts[0]),
+                           let ey = Double(endParts[1]) {
 
-                        let minX = min(starA.x, starB.x)
-                        let maxX = max(starA.x, starB.x)
-                        let minY = min(starA.y, starB.y)
-                        let maxY = max(starA.y, starB.y)
+                            // Scale to canvas space
+                            let start = scalePoint((sx, sy), xScale, yScale)
+                            let end = scalePoint((ex, ey), xScale, yScale)
 
-                        let filteredLine = line.filter { p in
-                            (minX...maxX).contains(p.x) && (minY...maxY).contains(p.y)
-                        }
-
-                        if !filteredLine.isEmpty {
+                            // Draw yellow line
                             var path = Path()
-                            path.move(to: scalePoint(filteredLine.first!, xScale, yScale))
-                            for point in filteredLine.dropFirst() {
-                                path.addLine(to: scalePoint(point, xScale, yScale))
-                            }
+                            path.move(to: start)
+                            path.addLine(to: end)
 
-                            // <-- CHANGE .cyan TO .yellow
                             context.stroke(
                                 path,
                                 with: .color(.yellow),
                                 style: StrokeStyle(lineWidth: 3, lineCap: .round)
                             )
+
+                            // Draw start + end dots
+                            let dotRadius: CGFloat = 5
+
+                            context.fill(
+                                Circle().path(in: CGRect(
+                                    x: start.x - dotRadius,
+                                    y: start.y - dotRadius,
+                                    width: dotRadius * 2,
+                                    height: dotRadius * 2
+                                )),
+                                with: .color(.white)
+                            )
+
+                            context.fill(
+                                Circle().path(in: CGRect(
+                                    x: end.x - dotRadius,
+                                    y: end.y - dotRadius,
+                                    width: dotRadius * 2,
+                                    height: dotRadius * 2
+                                )),
+                                with: .color(.white)
+                            )
                         }
                     }
+
 
                 }
                 .background(Color.black.opacity(0.7))

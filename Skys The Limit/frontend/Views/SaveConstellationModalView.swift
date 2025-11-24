@@ -4,7 +4,8 @@ import SwiftUI
 struct SaveConstellationModalView: View {
     @Binding var isPresented: Bool
     @Binding var equations: [String]
-    @Binding var constellationName: String   // ← FIXED: true binding from parent
+    @Binding var constellationName: String
+    @Binding var startEndCords: [String]
     var docID: String? = nil
     var deviceID = UIDevice.current.identifierForVendor?.uuidString ?? "unknown_device"
 
@@ -16,6 +17,7 @@ struct SaveConstellationModalView: View {
     var body: some View {
         NavigationView {
             VStack(spacing: 25) {
+
                 Text("Save Constellation")
                     .font(.custom("SpaceMono-Bold", size: 38))
                     .padding(.top, 25)
@@ -34,6 +36,7 @@ struct SaveConstellationModalView: View {
                 Spacer()
 
                 HStack(spacing: 20) {
+
                     Button("Cancel") {
                         isPresented = false
                         onCancel?()
@@ -45,13 +48,11 @@ struct SaveConstellationModalView: View {
                     .foregroundColor(.white)
                     .cornerRadius(14)
 
+                    // 🔥 NOW ONLY triggers parent save — NO DB save here
                     Button("Save") {
                         guard !constellationName.isEmpty else { return }
-                        Task {
-                            await saveConstellation()
-                            onSave?()
-                            isPresented = false
-                        }
+                        onSave?()
+                        isPresented = false
                     }
                     .font(.custom("SpaceMono-Bold", size: 28))
                     .frame(maxWidth: .infinity)
@@ -65,19 +66,5 @@ struct SaveConstellationModalView: View {
             }
             .navigationBarHidden(true)
         }
-    }
-
-    private func saveConstellation() async {
-        guard !constellationName.isEmpty else { return }
-
-        let rowId = docID ?? deviceID
-
-        await update_document(
-            rowId: rowId,
-            equations: equations,
-            name: constellationName
-        )
-
-        print("Updated constellation '\(constellationName)' with \(equations.count) equations")
     }
 }

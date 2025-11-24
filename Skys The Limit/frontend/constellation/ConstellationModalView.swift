@@ -1,12 +1,3 @@
-//
-//  ConstellationModalView.swift
-//  Skys The Limit
-//
-//  Created by Chris  on 19/11/25.
-
-// this view is a modal sheet when users want to create a new constellation with the + button in my constellation
-// if i could i would name it CreateConstellationModalView
-
 import SwiftUI
 
 struct ConstellationModalView: View {
@@ -14,8 +5,10 @@ struct ConstellationModalView: View {
     @Binding var numberOfStars: String
     @Binding var isShared: Bool
     @Environment(\.dismiss) var dismiss
-    let tempEquation = ["1 = 2", "2, 3"]
     
+    // Placeholder equations (or could be empty)
+    let tempEquations: [String] = []
+
     var body: some View {
         NavigationView {
             Form {
@@ -30,29 +23,46 @@ struct ConstellationModalView: View {
             .toolbar {
                 // Cancel button
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Dismiss") {
+                    Button {
                         dismiss()
+                    } label: {
+                        Text("Dismiss")
                     }
                 }
                 
                 // Done button
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Done") {
-                        guard !name.isEmpty && numberOfStars != nil else { return }
-                        
-                        print("Created: \(name), Stars: \(numberOfStars), Shared: \(isShared)")
-                        
+                    Button {
+                        // Action
+                        guard !name.isEmpty else { return }
                         Task {
-                            let userHasNoDocument = await checkIfUserHasDocument()
-                            await post_to_database(equations: tempEquation, name: name)
-
+                            // 1. Check if user has any documents
+                            let _ = await checkIfUserHasDocument()
+                            
+                            // 2. Generate a placeholder start/end coordinates (empty for now)
+                            let startEndCords: [String] = []
+                            
+                            // 3. Create parameters struct
+                            let parameters = AppwriteFunctionsParameters(
+                                id: nil,
+                                userId: UIDevice.current.identifierForVendor?.uuidString ?? "unknown_device",
+                                name: name,
+                                equations: tempEquations,
+                                isShared: isShared,
+                                startEndCords: startEndCords
+                            )
+                            
+                            // 4. Save to database
+                            await postToDatabase(parameters: parameters)
+                            
+                            // 5. Dismiss modal
                             dismiss()
                         }
+                    } label: {
+                        Text("Done")
                     }
-
                 }
             }
         }
     }
 }
-

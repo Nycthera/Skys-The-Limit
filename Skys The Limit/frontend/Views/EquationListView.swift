@@ -103,11 +103,16 @@ struct EquationListView: View {
             SaveConstellationModalView(
                 isPresented: $showSaveModal,
                 equations: $viewModel.successfulEquations,
-                constellationName: $newConstellationName,    // ← FIXED BINDING
+                constellationName: $newConstellationName,
+                startEndCords: Binding(get: {
+                    let stars = viewModel.stars
+                    guard let first = stars.first, let last = stars.last else { return [] }
+                    return ["\(Int(first.x)),\(Int(first.y))", "\(Int(last.x)),\(Int(last.y))"]
+                }, set: { _ in }),
                 docID: nil,
                 onSave: {
                     Task {
-                        await saveCompletedConstellation()
+                        await saveCompletedConstellation()   // 🔥 SAVED ONCE HERE
                         goHome = true
                     }
                 },
@@ -116,6 +121,7 @@ struct EquationListView: View {
                 }
             )
         }
+        
     }
     
     // ==========================================================
@@ -124,11 +130,26 @@ struct EquationListView: View {
     func saveCompletedConstellation() async {
         let equationStrings = viewModel.successfulEquations
         
-        await post_to_database(
+        // Auto compute start and end coordinates
+        let stars = viewModel.stars
+        let startEndCoords: [String] = {
+            guard let first = stars.first, let last = stars.last else { return [] }
+            return ["\(Int(first.x)),\(Int(first.y))", "\(Int(last.x)),\(Int(last.y))"]
+        }()
+        
+        let parameters = AppwriteFunctionsParameters(
+            id: nil,
+            userId: UIDevice.current.identifierForVendor?.uuidString ?? "unknown_device",
+            name: newConstellationName,
             equations: equationStrings,
-            name: newConstellationName   // ← NOW ACTUALLY THE TYPED NAME
+            isShared: false,
+            startEndCords: startEndCoords
         )
+        
+        await postToDatabase(parameters: parameters)
+        print("Saved constellation '\(newConstellationName)' with \(equationStrings.count) equations and start/end coords: \(startEndCoords)")
     }
+    
     
     
     // ==========================================================

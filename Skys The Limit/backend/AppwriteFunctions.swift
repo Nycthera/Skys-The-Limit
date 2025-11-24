@@ -4,31 +4,53 @@ import UIKit
 import AppwriteModels
 import JSONCodable
 
+// MARK: - Struct for Appwrite Parameters
+struct AppwriteFunctionsParameters: Codable, Identifiable {
+    let id: String?               // $id
+    let userId: String            // consistent naming
+    var name: String
+    var equations: [String]
+    var isShared: Bool
+    var startEndCords: [String]   // match Appwrite column exactly
+
+    init(
+        id: String? = nil,
+        userId: String,
+        name: String,
+        equations: [String],
+        isShared: Bool,
+        startEndCords: [String]
+    ) {
+        self.id = id
+        self.userId = userId
+        self.name = name
+        self.equations = equations
+        self.isShared = isShared
+        self.startEndCords = startEndCords
+    }
+}
+
 // --- Global Constants & Variables ---
-let deviceID = UIDevice.current.identifierForVendor?.uuidString ?? "unknown_device"
-let databaseID = "69114f5e001d9116992a"
-let tableID = "constellation"
+let deviceId = UIDevice.current.identifierForVendor?.uuidString ?? "unknown_device"
+let databaseId = "69114f5e001d9116992a"
+let tableId = "constellation"
+var userTableIds: [String] = []
 
-// This array will store the unique ID(s) of the user's document(s).
-var userTableIDs: [String] = []
+// MARK: - Create a new document
+func postToDatabase(parameters: AppwriteFunctionsParameters) async {
+    let finalName = parameters.name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "Untitled" : parameters.name
 
-
-/// Creates a brand new document for a first-time user.
-func post_to_database(equations: [String], name: String) async {
-    let safeName = name.trimmingCharacters(in: .whitespacesAndNewlines)
-    let finalName = safeName.isEmpty ? "Untitled" : safeName
-
-    print("User has no document. Creating a new one...")
     do {
         let document = try await appwrite.table.createRow(
-            databaseId: databaseID,
-            tableId: tableID,
+            databaseId: databaseId,
+            tableId: tableId,
             rowId: ID.unique(),
             data: [
-                "userid": deviceID,
-                "equations": equations,
-                "isShared": false,
-                "name": finalName
+                "userid": parameters.userId,                   // matches Appwrite column
+                "name": finalName,
+                "equations": parameters.equations,
+                "isShared": parameters.isShared,
+                "startEndCords": parameters.startEndCords    // matches Appwrite column
             ],
             permissions: [
                 Permission.read(Role.any()),
@@ -37,54 +59,48 @@ func post_to_database(equations: [String], name: String) async {
             ]
         )
         print("Document created successfully: \(document.id)")
-        userTableIDs.append(document.id)
+        userTableIds.append(document.id)
     } catch {
         print("Error creating document: \(error.localizedDescription)")
     }
 }
 
-
-
-/// Fetches and stores the document IDs for the current user.
-func list_document_for_user() async {
-    print("Checking for existing documents for user: \(deviceID)...")
+// MARK: - List documents for user
+func listDocumentsForUser() async {
     do {
         let rowList = try await appwrite.table.listRows(
-            databaseId: databaseID,
-            tableId: tableID,
+            databaseId: databaseId,
+            tableId: tableId,
             queries: [
-                Query.equal("userid", value: deviceID)
+                Query.equal("userid", value: deviceId)   // matches Appwrite column
             ]
         )
-        // Get all document IDs associated with this user.
-        userTableIDs = rowList.rows.map { $0.id }
-        
-        if userTableIDs.isEmpty {
-            print("No documents found for this user.")
-        } else {
-            print("Fetched row IDs: \(userTableIDs)")
-        }
+        userTableIds = rowList.rows.map { $0.id }
+        print(userTableIds.isEmpty ? "No documents found for this user." : "Fetched row IDs: \(userTableIds)")
     } catch {
         print("Error listing documents: \(error.localizedDescription)")
     }
 }
 
+// MARK: - Update document
+func updateDocument(parameters: AppwriteFunctionsParameters) async {
+    guard let rowId = parameters.id else {
+        print("Error: No document ID provided for update.")
+        return
+    }
 
-/// Updates a document with a new list of equations and name, using a specific row/document ID.
-/// If the document doesn't exist, it creates a new one.
-func update_document(rowId: String, equations: [String], name: String) async {
-    let safeName = name.trimmingCharacters(in: .whitespacesAndNewlines)
-    let finalName = safeName.isEmpty ? "Untitled" : safeName
+    let finalName = parameters.name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "Untitled" : parameters.name
 
-    print("Updating document with ID: \(rowId)...")
     do {
         _ = try await appwrite.table.updateRow(
-            databaseId: databaseID,
-            tableId: tableID,
+            databaseId: databaseId,
+            tableId: tableId,
             rowId: rowId,
             data: [
-                "equations": equations,
-                "name": finalName
+                "name": finalName,
+                "equations": parameters.equations,
+                "isShared": parameters.isShared,
+                "startEndCords": parameters.startEndCords
             ],
             permissions: [Permission.read(Role.any())]
         )
@@ -94,13 +110,12 @@ func update_document(rowId: String, equations: [String], name: String) async {
     }
 }
 
-
-// MARK: - Delete (DELETE)
-func delete_document(rowId: String) async {
+// MARK: - Delete document
+func deleteDocument(rowId: String) async {
     do {
         try await appwrite.table.deleteRow(
-            databaseId: databaseID,
-            tableId: tableID,
+            databaseId: databaseId,
+            tableId: tableId,
             rowId: rowId
         )
         print("Document deleted: \(rowId)")
@@ -109,91 +124,53 @@ func delete_document(rowId: String) async {
     }
 }
 
-// MARK: - Share / Unshare
-func toggle_share(rowId: String, share: Bool) async {
+// MARK: - Toggle share
+func toggleShare(rowId: String, share: Bool) async {
     do {
         let updated = try await appwrite.table.updateRow(
-            databaseId: databaseID,
-            tableId: tableID,
+            databaseId: databaseId,
+            tableId: tableId,
             rowId: rowId,
-            data: [
-                "isShared": share
-            ]
+            data: ["isShared": share]
         )
-        print(share ? " Constellation shared: \(updated.id)" : "Constellation unshared: \(updated.id)")
+        print(share ? "Constellation shared: \(updated.id)" : "Constellation unshared: \(updated.id)")
     } catch {
         print("Error toggling share state: \(error.localizedDescription)")
     }
 }
 
-// MARK: - Check shared document (public access)
-func get_shared_document(rowId: String) async {
+// MARK: - Fetch single document as AppwriteFunctionsParameters
+func getDocumentForUser(rowId: String) async -> AppwriteFunctionsParameters? {
     do {
         let document = try await appwrite.table.getRow(
-            databaseId: databaseID,
-            tableId: tableID,
-            rowId: rowId
-        )
-        print("Shared document fetched: \(document)")
-    } catch {
-        print("Error fetching shared document: \(error.localizedDescription)")
-    }
-}
-
-/// Fetches the first document belonging to the current user
-/// and prints/returns its contents.
-struct Constellation: Identifiable {
-    let id: String
-    let userId: String
-    let name: String
-    let equations: [String]
-    let isShared: Bool
-}
-
-func get_document_for_user(rowId: String) async -> Constellation? {
-    do {
-        let document = try await appwrite.table.getRow(
-            databaseId: databaseID,
-            tableId: tableID,
+            databaseId: databaseId,
+            tableId: tableId,
             rowId: rowId
         )
 
-        let rawName = (document.data["name"] as? AnyCodable)?.value as? String ?? ""
-        let safeName = rawName.trimmingCharacters(in: .whitespacesAndNewlines)
-        let name = safeName.isEmpty ? "Untitled" : safeName
+        let name = ((document.data["name"] as? AnyCodable)?.value as? String ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+        let equations = (document.data["equations"] as? AnyCodable)?.value as? [String] ?? []
+        let isShared = (document.data["isShared"] as? AnyCodable)?.value as? Bool ?? false
+        let startEndCords = (document.data["startEndCords"] as? AnyCodable)?.value as? [String] ?? []
+        let userId = (document.data["userid"] as? AnyCodable)?.value as? String ?? "unknown"
 
-        var equations: [String] = []
-        if let anyEquations = document.data["equations"] as? AnyCodable {
-            if let arr = anyEquations.value as? [String] {
-                equations = arr
-            } else if let single = anyEquations.value as? String {
-                equations = [single]
-            }
-        }
-
-        return Constellation(
+        return AppwriteFunctionsParameters(
             id: document.id,
-            userId: (document.data["userid"] as? AnyCodable)?.value as? String ?? "unknown",
-            name: name,
+            userId: userId,
+            name: name.isEmpty ? "Untitled" : name,
             equations: equations,
-            isShared: (document.data["isShared"] as? AnyCodable)?.value as? Bool ?? false
+            isShared: isShared,
+            startEndCords: startEndCords
         )
-
     } catch {
         print("Error fetching document: \(error.localizedDescription)")
         return nil
     }
 }
 
-
-
-
-
+// MARK: - Check if user has any document
 func checkIfUserHasDocument() async -> Bool {
-    await list_document_for_user()   // updates userTableIDs
-    
-    print("Response from checkIfUserHasDocument(): \(userTableIDs)")
-    
-    // Return true if NO documents, false if documents exist
-    return userTableIDs.isEmpty
+    await listDocumentsForUser()
+    print("Response from checkIfUserHasDocument(): \(userTableIds)")
+    return userTableIds.isEmpty
 }

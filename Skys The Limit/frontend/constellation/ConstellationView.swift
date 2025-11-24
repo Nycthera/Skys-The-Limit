@@ -1,4 +1,5 @@
-//This view is the main screen that shows all constellations the user created, lets them create new ones, open them, and delete them.
+// ConstellationView.swift
+// Main screen for showing, creating, opening, and deleting constellations
 
 import SwiftUI
 import SwiftMath
@@ -10,16 +11,16 @@ struct ConstellationView: View {
     @State private var isShared = false
     
     // Track selected constellation to show in canvas
-    @State private var selectedConstellation: Constellation? = nil
+    @State private var selectedConstellation: AppwriteFunctionsParameters? = nil
     
     // Store constellation rows from Appwrite
-    @State private var constellations: [Constellation] = []
+    @State private var constellations: [AppwriteFunctionsParameters] = []
     
-    // NEW: delete states
+    // Delete states
     @State private var showDeleteAlert = false
-    @State private var constellationToDelete: Constellation? = nil
+    @State private var constellationToDelete: AppwriteFunctionsParameters? = nil
     
-    let deviceID: String = UIDevice.current.identifierForVendor?.uuidString ?? "unknown_device"
+    let deviceId: String = UIDevice.current.identifierForVendor?.uuidString ?? "unknown_device"
     
     // 2-column flexible grid
     private static let gridColumns: [GridItem] = [
@@ -27,10 +28,8 @@ struct ConstellationView: View {
         GridItem(.flexible(minimum: 0, maximum: .infinity), spacing: 16)
     ]
     
-    // this is the Individual constellation cell
     var body: some View {
         ZStack(alignment: .bottomTrailing) {
-            
             Image("Space")
                 .resizable()
                 .ignoresSafeArea()
@@ -52,17 +51,17 @@ struct ConstellationView: View {
             }
         }
         
-        // <-- Full screen cover to show the selected constellation
+        // Full screen cover to show selected constellation
         .fullScreenCover(item: $selectedConstellation) { constellation in
-            CustomConstellationView(ID: constellation.id)
+            CustomConstellationView(ID: constellation.id ?? "")
         }
         
-        // NEW: Delete alert
+        // Delete alert
         .alert("Delete Constellation?", isPresented: $showDeleteAlert) {
             Button("Delete", role: .destructive) {
                 Task {
-                    if let c = constellationToDelete {
-                        await deleteConstellation(id: c.id)
+                    if let c = constellationToDelete, let rowId = c.id {
+                        await deleteDocument(rowId: rowId)
                         await loadConstellations()
                     }
                 }
@@ -81,12 +80,12 @@ struct ConstellationView: View {
     
     // MARK: - Load all documents from Appwrite
     func loadConstellations() async {
-        await list_document_for_user()
+        await listDocumentsForUser()
         
-        var fetched: [Constellation] = []
+        var fetched: [AppwriteFunctionsParameters] = []
         
-        for id in userTableIDs {
-            if let doc = await get_document_for_user(rowId: id) {
+        for id in userTableIds {
+            if let doc = await getDocumentForUser(rowId: id) {
                 fetched.append(doc)
             }
         }
@@ -99,7 +98,7 @@ struct ConstellationView: View {
     
     // MARK: - Delete document
     func deleteConstellation(id: String) async {
-        await delete_document(rowId: id)
+        await deleteDocument(rowId: id)
     }
 }
 
@@ -119,7 +118,7 @@ extension Array {
 }
 
 private struct ConstellationCellView: View {
-    let constellation: Constellation
+    let constellation: AppwriteFunctionsParameters
 
     var body: some View {
         VStack(spacing: 12) {
