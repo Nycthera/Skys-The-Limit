@@ -10,7 +10,7 @@ import SwiftUI
 struct TutorialLevelOneView: View {
     @Binding var isShowingTutorial: Bool
 
-    private let VideoFiles = ["Recording-1", "Recording-2", "Recording-3", "HIIII WO AI NI"]
+    private let VideoFiles = ["HIIII WO AI NI"]
 
     var body: some View {
         VStack {

@@ -76,11 +76,16 @@ struct ConstellationView: View {
                                 numberOfStars = intVal
                             }
                         }
-                        
                     ),
                     isShared: $isShared
                 )
             }
+            .onChange(of: showModal) { newValue in
+                if newValue == false {       // means it just closed
+                    Task { await loadConstellations() }
+                }
+            }
+
             ///------------------------
         }
 
