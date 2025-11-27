@@ -50,7 +50,7 @@ struct AnimationView: View {
                     .foregroundColor(.white)
                     .opacity(showText ? 1.0 : 0.0) // Fully opaque when showText is true, fully transparent otherwise
                     .animation(.easeInOut, value: showText)
-                    .padding(110)
+                    .padding(170)
 
                 Spacer()
             }
