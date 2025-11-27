@@ -138,7 +138,7 @@ struct GraphCanvasView: View {
                         // --- Coordinate label for THIS star only ---
                         if selectedStarIndex == index {
                             Text("(\(Int(star.x)), \(Int(star.y)))")
-                                .font(.caption)
+                                .font(.system(size: 24))
                                 .foregroundColor(.white)
                                 .padding(4)
                                 .background(Color.black.opacity(0.7))
