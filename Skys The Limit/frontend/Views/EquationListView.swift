@@ -61,19 +61,6 @@ struct EquationListView: View {
                                 .padding(.leading, 6)
                         }
                     }
-                    // if you want the users to immediately solve a puzzle every time they launch the app a bit annoying tho
-//                    ToolbarItem(placement: .navigationBarTrailing) {
-//                        NavigationLink {
-//                            MainMenuView()      // <-- destination
-//                        } label: {
-//                            Text("Back")
-//                                .font(.custom("SpaceMono-Regular", size: 18))
-//                                .padding(5)
-//                                .background(Color.black.opacity(0.5))
-//                                .foregroundColor(.white)
-//                                .cornerRadius(8)
-//                        }
-//                    }
                 }
             }
 
@@ -231,7 +218,7 @@ struct EquationListView: View {
         @State private var isConfirmingLine = false
 
         var body: some View {
-            VStack(spacing: 15) {
+            VStack(/*spacing: 15*/) {
 
                 if !viewModel.isPuzzleComplete &&
                     viewModel.stars.count > viewModel.currentTargetIndex + 1 {
@@ -248,7 +235,7 @@ struct EquationListView: View {
                     currentTargetIndex: viewModel.currentTargetIndex,
                     connectedStarIndices: viewModel.connectedStarIndices
                 )
-                .frame(height: canvasHeight)
+                .frame(height: canvasHeight * 1.1)
 
                 MathView(
                     equation: viewModel.currentLatexString,
