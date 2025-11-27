@@ -224,7 +224,7 @@ struct EquationListView: View {
                     viewModel.stars.count > viewModel.currentTargetIndex + 1 {
 
                     Text("Connect Star \(viewModel.currentTargetIndex + 1) → Star \(viewModel.currentTargetIndex + 2)")
-                        .font(.custom("SpaceMono-Regular", size: 35))
+                        .font(.custom("SpaceMono-Regular", size: 30))
                         .foregroundColor(.yellow)
                 }
 
@@ -235,14 +235,14 @@ struct EquationListView: View {
                     currentTargetIndex: viewModel.currentTargetIndex,
                     connectedStarIndices: viewModel.connectedStarIndices
                 )
-                .frame(height: canvasHeight * 1.1)
+                .frame(height: canvasHeight)
 
                 MathView(
                     equation: viewModel.currentLatexString,
-                    fontSize: 37
+                    fontSize: 32
                 )
-                .frame(maxWidth: .infinity, minHeight: 40, maxHeight: 40)
-                .padding(5)
+                .frame(maxWidth: .infinity, minHeight: 30, maxHeight: 30)
+                .padding(4)
                 .background(Color.black.opacity(0.5))
                 .cornerRadius(12)
 
