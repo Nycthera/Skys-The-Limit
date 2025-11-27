@@ -40,8 +40,8 @@ struct MathKeyboardView: View {
             MathKey(display: "9", mathValue: "9", type: .character),
             MathKey(display: ".", mathValue: ".", type: .character),
             
-            //                MathKey(display: "<", mathValue: "<", type: .character),
-            //                MathKey(display: ">", mathValue: ">", type: .character)
+                            MathKey(display: "<", mathValue: "<", type: .character),
+                            MathKey(display: ">", mathValue: ">", type: .character)
         ],
         [
             MathKey(display: "0", mathValue: "0", type: .character),
@@ -49,9 +49,9 @@ struct MathKeyboardView: View {
             MathKey(display: "y", mathValue: "y", type: .character),
             MathKey(display: "/", mathValue: "/", type: .character),
             
-            //                MathKey(display: "=", mathValue: "=", type: .character),
-            //                MathKey(display: "{", mathValue: "{", type: .character),
-            //                MathKey(display: "}", mathValue: "}", type: .character),
+            MathKey(display: "=", mathValue: "=", type: .character),
+                       MathKey(display: "{", mathValue: "{", type: .character),
+                            MathKey(display: "}", mathValue: "}", type: .character),
             MathKey(display: "⌫", mathValue: "", type: .backspace)
         ]
     ]
