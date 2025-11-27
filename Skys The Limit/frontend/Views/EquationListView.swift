@@ -252,9 +252,10 @@ struct EquationListView: View {
 
                 MathView(
                     equation: viewModel.currentLatexString,
-                    fontSize: 40
+                    fontSize: 37
                 )
-                .frame(maxWidth: .infinity, minHeight: 10, maxHeight: 20)
+                .frame(maxWidth: .infinity, minHeight: 40, maxHeight: 40)
+                .padding(5)
                 .background(Color.black.opacity(0.5))
                 .cornerRadius(12)
 
@@ -275,17 +276,18 @@ struct EquationListView: View {
                     }
                 } label: {
                     Text(isConfirmingLine ? "Confirm Line" : "Check Line")
-                        .font(.custom("SpaceMono-Regular", size: 20))
+                        .font(.custom("SpaceMono-Regular", size: 30))
                         .frame(maxWidth: .infinity, minHeight: 10, maxHeight: 20)
-                        .padding(.vertical, 15)
-                        .padding(.bottom, 50)
+                        .padding(30)
                         .background(isConfirmingLine ? Color.blue : Color.white)
                         .foregroundColor(isConfirmingLine ? .white : .black)
                         .cornerRadius(15)
                 }
+                .padding(.vertical, 15)
                 .disabled(viewModel.isPuzzleComplete)
 
             }
         }
     }
 }
+

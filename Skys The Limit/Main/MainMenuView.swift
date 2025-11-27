@@ -6,27 +6,27 @@ struct MainMenuView: View {
     var body: some View {
         ZStack(alignment: .top) {
 
-            Image("Space")
+            Image("Home")
                 .resizable()
                 .aspectRatio(contentMode: .fill)
                 .edgesIgnoringSafeArea(.all)
 
-            VStack(spacing: 30) {
+            VStack(alignment: .center, spacing: 30) {
                 Text("Let's start!")
-                    .font(.custom("SpaceMono-Regular", size: 45))
+                    .font(.custom("SpaceMono-Regular", size: 55))
                     .foregroundColor(.white)
                     .padding(.top, 50)
 
                 Spacer()
 
-                VStack(alignment: .leading, spacing: 50) {
+                VStack(alignment: .center, spacing: 50) {
 
                     
                     NavigationLink{
                         EquationListView()
                     }label:{
                         Text("Draw The Stars")
-                            .padding(20)
+                            .frame(width: 350, height: 90)
                             .background(.white.opacity(0.7))
                             .clipShape(RoundedRectangle(cornerRadius: 30))
                     }
@@ -35,7 +35,7 @@ struct MainMenuView: View {
                         ConstellationView()
                     }label:{
                         Text("My Galaxy")
-                            .padding(20)
+                            .frame(width: 350, height: 90)
                             .background(.white.opacity(0.7))
                             .clipShape(RoundedRectangle(cornerRadius: 30))
                     }
@@ -44,7 +44,7 @@ struct MainMenuView: View {
                         TutorialLevelOneView(isShowingTutorial: $isShowingTutorial)
                     }label:{
                         Text("Tutorial")
-                            .padding(20)
+                            .frame(width: 350, height: 90)
                             .background(.white.opacity(0.7))
                             .clipShape(RoundedRectangle(cornerRadius: 30))
                     }
@@ -52,8 +52,7 @@ struct MainMenuView: View {
                 }
                 .font(.custom("SpaceMono-Regular", size: 45))
                 .foregroundColor(.black)
-
-                Spacer()
+                .padding(100)
             }
         }
         .navigationBarHidden(true)
