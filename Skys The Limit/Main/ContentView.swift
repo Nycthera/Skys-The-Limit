@@ -10,7 +10,7 @@ struct ContentView: View {
         // This NavigationView is the engine that makes all NavigationLinks work.
         NavigationView {
             // It starts by showing the WelcomeView.
-            FadeShowView()
+            MainMenuView()
         }
 
         .navigationBarHidden(true)
