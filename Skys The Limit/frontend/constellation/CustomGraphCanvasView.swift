@@ -50,7 +50,7 @@ struct CustomGraphCanvasView: View {
                     axes.move(to: CGPoint(x: 0, y: -size.height/2 + padding))
                     axes.addLine(to: CGPoint(x: 0, y: size.height/2 - padding))
                     context.stroke(axes, with: .color(.white.opacity(0.7)), lineWidth: 2)
-                    
+
                     for linePoints in successfulLines {
                             guard let firstPoint = linePoints.first else { continue }
 

@@ -49,7 +49,7 @@ struct ConstellationView: View {
                 }
                 .padding()
             }
-            
+
             // ----------add button
             Button {
                 print("Add pressed")
@@ -86,7 +86,7 @@ struct ConstellationView: View {
                 }
             }
 
-            ///------------------------
+            /// ------------------------
         }
 
         // Full screen cover to show selected constellation

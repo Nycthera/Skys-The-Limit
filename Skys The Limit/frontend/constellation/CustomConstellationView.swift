@@ -6,21 +6,21 @@ struct CustomConstellationView: View {
     @State private var arrayOfEquations: [String] = []
     @State private var stars: [CGPoint] = []
     @State private var successfulLines: [[(x: Double, y: Double)]] = []
-    
+
     @State private var editingLatexString: String = ""
     @State private var editingMathString: String = ""
     @State private var editingIndex: Int?
-    
+
     @State private var isSidebarCollapsed = false
     @State private var showSaveModal = false
-    
+
     @State private var constellationName: String = ""
     @State private var startEndCoords: [String] = [""]
-    
+
     @Environment(\.presentationMode) var presentationMode
     let ID: String
     private let sidebarWidth: CGFloat = 250
-    
+
     var body: some View {
         NavigationView {
             GeometryReader { geo in
@@ -30,7 +30,7 @@ struct CustomConstellationView: View {
                         .resizable()
                         .scaledToFill()
                         .ignoresSafeArea()
-                    
+
                     HStack(spacing: 0) {
                         // Sidebar
                         CustomSidebarView(
@@ -39,7 +39,7 @@ struct CustomConstellationView: View {
                             editingString: $editingLatexString,
                             editingIndex: $editingIndex
                         )
-                        
+
                         // Main content
                         ScrollView {
                             VStack(spacing: 25) {
@@ -55,7 +55,7 @@ struct CustomConstellationView: View {
                                 .frame(height: geo.size.height * 0.5)
                                 .background(Color.black.opacity(0.2))
                                 .cornerRadius(12)
-                                
+
                                 // Current input
                                 VStack(alignment: .leading) {
                                     Text("y = \(editingLatexString)")
@@ -66,24 +66,24 @@ struct CustomConstellationView: View {
                                         .background(Color.white.opacity(0.1))
                                         .cornerRadius(8)
                                 }
-                                
+
                                 // Keyboard
                                 MathKeyboardView(
                                     latexString: $editingLatexString,
                                     mathString: $editingMathString
                                 )
                                 .fixedSize(horizontal: false, vertical: true)
-                                
+
                                 // Add / Update button
                                 Button {
                                     guard !editingMathString.isEmpty else { return }
-                                    
+
                                     if let index = editingIndex {
                                         arrayOfEquations[index] = editingMathString
                                     } else {
                                         arrayOfEquations.append(editingMathString)
                                     }
-                                    
+
                                     editingLatexString = ""
                                     editingMathString = ""
                                     editingIndex = nil
@@ -104,7 +104,7 @@ struct CustomConstellationView: View {
                     }
                 }
             }
-            
+
             // Navigation bar
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -117,7 +117,7 @@ struct CustomConstellationView: View {
                             .foregroundColor(.white)
                     }
                 }
-                
+
                 ToolbarItem(placement: .navigationBarTrailing) {
                     HStack(spacing: 12) {
                         // Save
@@ -126,7 +126,7 @@ struct CustomConstellationView: View {
                                 .font(.system(size: 20, weight: .bold))
                                 .foregroundColor(.white)
                         }
-                        
+
                         // Back
                         Button("Back") {
                             presentationMode.wrappedValue.dismiss()
@@ -139,7 +139,7 @@ struct CustomConstellationView: View {
                     }
                 }
             }
-            
+
             // Load document
             .onAppear {
                 Task {
@@ -154,7 +154,7 @@ struct CustomConstellationView: View {
                 updateStarsFromEquations()
             }
         }
-        
+
         // Save modal
         .sheet(isPresented: $showSaveModal) {
             SaveConstellationModalView(
@@ -173,24 +173,24 @@ struct CustomConstellationView: View {
                 }
             )
         }
-        
+
         .navigationViewStyle(.stack)
     }
-    
+
     // MARK: - Star Update
     private func updateStarsFromEquations() {
         stars = []
         successfulLines = []
-        
+
         for eq in arrayOfEquations {
             let engine = MathEngine(equation: eq)
             guard let points = engine.evaluate(), !points.isEmpty else { continue }
-            
+
             stars.append(contentsOf: points.map { CGPoint(x: $0.x, y: $0.y) })
             successfulLines.append(points)
         }
     }
-    
+
     // MARK: - Save to Appwrite (with y= prefix)
     private func saveToAppwrite() async {
         do {
@@ -198,7 +198,7 @@ struct CustomConstellationView: View {
             let equationsWithY = arrayOfEquations.map { eq in
                 eq.starts(with: "y =") ? eq : "y = \(eq)"
             }
-            
+
             try await updateUserDocument(
                 id: ID,
                 name: constellationName,
@@ -210,7 +210,7 @@ struct CustomConstellationView: View {
             print("❌ Error saving:", error)
         }
     }
-    
+
     // MARK: - Update document wrapper (unchanged)
     private func updateUserDocument(id: String, name: String, equations: [String], startEndCoords: [String], isShared: Bool = false) async throws {
         let parameters = AppwriteFunctionsParameters(
@@ -223,14 +223,14 @@ struct CustomConstellationView: View {
         )
         await updateDocument(parameters: parameters)
     }
-    
+
     // MARK: - Sidebar
     private struct CustomSidebarView: View {
         let isCollapsed: Bool
         @Binding var equations: [String]
         @Binding var editingString: String
         @Binding var editingIndex: Int?
-        
+
         var body: some View {
             VStack(alignment: .leading, spacing: 10) {
                 if !isCollapsed {
@@ -238,7 +238,7 @@ struct CustomConstellationView: View {
                         .font(.custom("SpaceMono-Bold", size: 24))
                         .foregroundColor(.white)
                         .padding(.top, 20)
-                    
+
                     ScrollView {
                         VStack(alignment: .leading, spacing: 8) {
                             ForEach(equations.indices, id: \.self) { idx in
@@ -270,7 +270,7 @@ struct CustomConstellationView: View {
                         .padding(.horizontal, 8)
                     }
                 }
-                
+
                 Spacer()
             }
             .frame(width: isCollapsed ? 0 : 250)

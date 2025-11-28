@@ -21,34 +21,33 @@ struct MainMenuView: View {
 
                 VStack(alignment: .center, spacing: 50) {
 
-                    
-                    NavigationLink{
+                    NavigationLink {
                         EquationListView()
-                    }label:{
+                    }label: {
                         Text("Draw The Stars")
                             .frame(width: 350, height: 90)
                             .background(.white.opacity(0.7))
                             .clipShape(RoundedRectangle(cornerRadius: 30))
                     }
 
-                    NavigationLink{
+                    NavigationLink {
                         ConstellationView()
-                    }label:{
+                    }label: {
                         Text("My Galaxy")
                             .frame(width: 350, height: 90)
                             .background(.white.opacity(0.7))
                             .clipShape(RoundedRectangle(cornerRadius: 30))
                     }
-              
-                    NavigationLink{
+
+                    NavigationLink {
                         TutorialLevelOneView(isShowingTutorial: $isShowingTutorial)
-                    }label:{
+                    }label: {
                         Text("Tutorial")
                             .frame(width: 350, height: 90)
                             .background(.white.opacity(0.7))
                             .clipShape(RoundedRectangle(cornerRadius: 30))
                     }
-                    
+
                 }
                 .font(.custom("SpaceMono-Regular", size: 45))
                 .foregroundColor(.black)
