@@ -40,6 +40,3 @@ We welcome contributions! See `CONTRIBUTING.md` for guidelines on reporting issu
 
 ## License
 This project is available under the MIT License. See `LICENSE` for details.
-
----
-If you'd like, I can also help create the GitHub repository and push these changes (I will need your permission and remote access instructions), or help set up CI and release steps.
