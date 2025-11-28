@@ -5,6 +5,7 @@ Skys The Limit is an educational iOS app that combines math equation puzzles wit
 This repository contains the app source (Swift + SwiftUI) and backend helpers that integrate with Appwrite for persistence.
 
 ## Features
+
 - Interactive math equation puzzles and visual feedback
 - Custom graph/canvas rendering of constellations
 - Save, update, and share constellations via Appwrite
@@ -15,20 +16,24 @@ This repository contains the app source (Swift + SwiftUI) and backend helpers th
 These instructions help you build and run the app locally on macOS with Xcode.
 
 ### Prerequisites
+
 - macOS with Xcode (recommended: latest stable Xcode)
 - Swift toolchain provided by Xcode
 - (Optional) Homebrew for installing helper tools
 
 ### Build and Run
+
 1. Open `Skys The Limit.xcworkspace` in Xcode.
 2. Select a simulator or your device and run the app (Cmd+R).
 
 ### Appwrite Configuration
+
 The project contains Appwrite integration under the `Backend/` folder. Before using the Appwrite-backed features, set up an Appwrite project and update the endpoint and project id in `Backend/AppwriteService.swift` if necessary.
 
 Important: Do not commit secrets or private API keys. Use environment variables or secure storage for production keys.
 
 ## Development Notes
+
 - Formatting & linting: This repo includes a GitHub workflow for `swiftlint` / `swiftformat`. Please run linters locally before submitting PRs.
 - Main files:
   - `Frontend/` — SwiftUI views and UI code
@@ -36,7 +41,9 @@ Important: Do not commit secrets or private API keys. Use environment variables 
   - `Core/` — shared utilities
 
 ## Contributing
+
 We welcome contributions! See `CONTRIBUTING.md` for guidelines on reporting issues, creating pull requests, and coding standards.
 
 ## License
-This project is available under the MIT License. See `LICENSE` for details.
+
+This project is available under the MIT License. See `LICENSE` for details
