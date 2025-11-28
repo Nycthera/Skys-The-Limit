@@ -1,0 +1,25 @@
+# Xcode
+# Build generated
+build/
+DerivedData/
+*.xcworkspace
+
+# User settings
+*.xcuserdatad
+xcuserdata/
+
+# Swift Package Manager
+.build/
+Package.resolved
+
+# CocoaPods
+Pods/
+
+# Fastlane
+fastlane/report.xml
+
+# macOS
+.DS_Store
+
+# App files
+*.xcarchive
