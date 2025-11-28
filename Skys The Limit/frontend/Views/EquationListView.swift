@@ -1,9 +1,12 @@
 import SwiftUI
 import SwiftMath
+import SwiftData
 
 struct EquationListView: View {
     @StateObject private var viewModel = EquationPuzzleViewModel()
     @EnvironmentObject var equationStore: EquationStore
+
+    @Environment(\.modelContext) private var context    // ← SwiftData context
 
     @State private var currentMathString: String = ""
     @State private var isSidebarCollapsed: Bool = false
@@ -14,7 +17,7 @@ struct EquationListView: View {
 
     // saving constellation
     @State private var showSaveModal = false
-    @State private var newConstellationName = ""     // ← FIXED: used as Binding
+    @State private var newConstellationName = ""
 
     var body: some View {
         ZStack {
@@ -64,9 +67,7 @@ struct EquationListView: View {
                 }
             }
 
-            // ==============================
-            //        PUZZLE COMPLETE
-            // ==============================
+            // PUZZLE COMPLETE OVERLAY
             if viewModel.isPuzzleComplete {
                 ZStack {
                     ConfettiView(isAnimating: $isCelebrating)
@@ -86,7 +87,7 @@ struct EquationListView: View {
                     .contentShape(Rectangle())
                     .onTapGesture {
                         isCelebrating = false
-                        showSaveModal = true   // show modal
+                        showSaveModal = true
                     }
                     .zIndex(20)
                 }
@@ -100,6 +101,7 @@ struct EquationListView: View {
             }
         }
         .sheet(isPresented: $showSaveModal) {
+
             SaveConstellationModalView(
                 isPresented: $showSaveModal,
                 equations: $viewModel.successfulEquations,
@@ -107,38 +109,45 @@ struct EquationListView: View {
                 startEndCords: Binding(get: {
                     let stars = viewModel.stars
                     guard let first = stars.first, let last = stars.last else { return [] }
-                    return ["\(Int(first.x)),\(Int(first.y))", "\(Int(last.x)),\(Int(last.y))"]
+                    return [
+                        "\(Int(first.x)),\(Int(first.y))",
+                        "\(Int(last.x)),\(Int(last.y))"
+                    ]
                 }, set: { _ in }),
                 docID: nil,
+
                 onSave: {
-                    Task {
-                        await saveCompletedConstellation()   // 🔥 SAVED ONCE HERE
-                        goHome = true
-                    }
+                    saveCompletedConstellation()   
+                    goHome = true
                 },
+
                 onCancel: {
                     goHome = true
                 }
             )
         }
-
     }
 
     // ==========================================================
-    //                SAVE TO DATABASE FUNCTION
+    //                SAVE TO SWIFTDATA
     // ==========================================================
-    func saveCompletedConstellation() async {
+    func saveCompletedConstellation() {
         let equationStrings = viewModel.successfulEquations
 
         // Auto compute start and end coordinates
         let stars = viewModel.stars
         let startEndCoords: [String] = {
             guard let first = stars.first, let last = stars.last else { return [] }
-            return ["\(Int(first.x)),\(Int(first.y))", "\(Int(last.x)),\(Int(last.y))"]
+            return [
+                "\(Int(first.x)),\(Int(first.y))",
+                "\(Int(last.x)),\(Int(last.y))"
+            ]
         }()
 
-        let parameters = AppwriteFunctionsParameters(
-            id: nil,
+        // SwiftData service
+        let service = ConstellationDataService(context: context)
+
+        service.createConstellation(
             userId: UIDevice.current.identifierForVendor?.uuidString ?? "unknown_device",
             name: newConstellationName,
             equations: equationStrings,
@@ -146,8 +155,7 @@ struct EquationListView: View {
             startEndCords: startEndCoords
         )
 
-        await postToDatabase(parameters: parameters)
-        print("Saved constellation '\(newConstellationName)' with \(equationStrings.count) equations and start/end coords: \(startEndCoords)")
+        print("Saved constellation '\(newConstellationName)' with \(equationStrings.count) equations.")
     }
 
     // ==========================================================

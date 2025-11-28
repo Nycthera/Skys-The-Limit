@@ -1,32 +1,33 @@
-// ConstellationView.swift
-// Main screen for showing, creating, opening, and deleting constellations
-
 import SwiftUI
+import SwiftData
 import SwiftMath
 
 struct ConstellationView: View {
+    @Environment(\.modelContext) private var context
+
+    // 🔹 Use @Query for auto-updating list
+    @Query(sort: \ConstellationModel.name) private var allConstellations: [ConstellationModel]
+
     @State private var showModal = false
     @State private var constellationName = ""
     @State private var numberOfStars: Int?
     @State private var isShared = false
 
-    // Track selected constellation to show in canvas
-    @State private var selectedConstellation: AppwriteFunctionsParameters?
-
-    // Store constellation rows from Appwrite
-    @State private var constellations: [AppwriteFunctionsParameters] = []
-
-    // Delete states
+    @State private var selectedConstellation: ConstellationModel?
     @State private var showDeleteAlert = false
-    @State private var constellationToDelete: AppwriteFunctionsParameters?
+    @State private var constellationToDelete: ConstellationModel?
 
-    let deviceId: String = UIDevice.current.identifierForVendor?.uuidString ?? "unknown_device"
+    private var deviceId: String { UIDevice.current.identifierForVendor?.uuidString ?? "unknown_device" }
 
-    // 2-column flexible grid
     private static let gridColumns: [GridItem] = [
         GridItem(.flexible(minimum: 0, maximum: .infinity), spacing: 16),
         GridItem(.flexible(minimum: 0, maximum: .infinity), spacing: 16)
     ]
+
+    // Filtered list for the current user
+    private var constellationsList: [ConstellationModel] {
+        allConstellations.filter { $0.userId == deviceId }
+    }
 
     var body: some View {
         ZStack(alignment: .bottomTrailing) {
@@ -36,7 +37,7 @@ struct ConstellationView: View {
 
             ScrollView {
                 LazyVGrid(columns: Self.gridColumns, spacing: 20) {
-                    ForEach(constellations) { constellation in
+                    ForEach(constellationsList) { constellation in
                         ConstellationCellView(constellation: constellation)
                             .onTapGesture {
                                 selectedConstellation = constellation
@@ -50,9 +51,7 @@ struct ConstellationView: View {
                 .padding()
             }
 
-            // ----------add button
             Button {
-                print("Add pressed")
                 showModal = true
             } label: {
                 Image(systemName: "plus")
@@ -70,93 +69,35 @@ struct ConstellationView: View {
                         get: { numberOfStars.map(String.init) ?? "" },
                         set: { newValue in
                             let trimmed = newValue.trimmingCharacters(in: .whitespaces)
-                            if trimmed.isEmpty {
-                                numberOfStars = nil
-                            } else if let intVal = Int(trimmed) {
-                                numberOfStars = intVal
-                            }
+                            numberOfStars = Int(trimmed)
                         }
                     ),
                     isShared: $isShared
                 )
             }
-            .onChange(of: showModal) { newValue in
-                if newValue == false {       // means it just closed
-                    Task { await loadConstellations() }
-                }
-            }
-
-            /// ------------------------
         }
-
-        // Full screen cover to show selected constellation
         .fullScreenCover(item: $selectedConstellation) { constellation in
-            CustomConstellationView(ID: constellation.id ?? "")
+            CustomConstellationView(ID: constellation.id)
         }
-
-        // Delete alert
         .alert("Delete Constellation?", isPresented: $showDeleteAlert) {
             Button("Delete", role: .destructive) {
-                Task {
-                    if let c = constellationToDelete, let rowId = c.id {
-                        await deleteDocument(rowId: rowId)
-                        await loadConstellations()
-                    }
+                if let c = constellationToDelete {
+                    let service = ConstellationDataService(context: context)
+                    service.deleteConstellation(c)
                 }
             }
             Button("Cancel", role: .cancel) { }
         } message: {
             Text("Are you sure you want to delete “\(constellationToDelete?.name ?? "")”?")
         }
-
-        .onAppear {
-            Task {
-                await loadConstellations()
-            }
-        }
-    }
-
-    // MARK: - Load all documents from Appwrite
-    func loadConstellations() async {
-        await listDocumentsForUser()
-
-        var fetched: [AppwriteFunctionsParameters] = []
-
-        for id in userTableIds {
-            if let doc = await getDocumentForUser(rowId: id) {
-                fetched.append(doc)
-            }
-        }
-
-        // Update UI on main thread
-        DispatchQueue.main.async {
-            self.constellations = fetched
-        }
-    }
-
-    // MARK: - Delete document
-    func deleteConstellation(id: String) async {
-        await deleteDocument(rowId: id)
     }
 }
 
-// Helper extension for chunking arrays into consecutive pairs
-extension Array {
-    func chunked(into size: Int) -> [[Element]] {
-        guard size > 0 else { return [] }
-        var chunks: [[Element]] = []
-        var index = 0
-        while index < count {
-            let end = Swift.min(index + size, count)
-            chunks.append(Array(self[index..<end]))
-            index += size
-        }
-        return chunks
-    }
-}
-
+// ==========================================================
+// MARK: - Constellation Cell
+// ==========================================================
 private struct ConstellationCellView: View {
-    let constellation: AppwriteFunctionsParameters
+    let constellation: ConstellationModel
 
     var body: some View {
         VStack(spacing: 12) {
@@ -168,12 +109,6 @@ private struct ConstellationCellView: View {
             Text("\(constellation.equations.count) equations")
                 .font(.subheadline)
                 .foregroundColor(.white.opacity(0.8))
-
-            if constellation.isShared {
-                Text("Shared")
-                    .font(.caption2)
-                    .foregroundColor(.green)
-            }
         }
         .padding(20)
         .frame(maxWidth: .infinity, minHeight: 150)
@@ -195,4 +130,5 @@ private struct ConstellationCellView: View {
 
 #Preview {
     ConstellationView()
+        .modelContainer(for: ConstellationModel.self)
 }

@@ -1,4 +1,5 @@
 import SwiftUI
+import SwiftData
 
 @main
 struct Skys_The_LimitApp: App {
@@ -13,5 +14,6 @@ struct Skys_The_LimitApp: App {
             ContentView()
                 .environmentObject(equationStore)
         }
+        .modelContainer(for: ConstellationModel.self)
     }
 }

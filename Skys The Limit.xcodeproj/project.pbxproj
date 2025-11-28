@@ -8,7 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		D98DCA1C2EC179F8003B9097 /* SwiftMath in Frameworks */ = {isa = PBXBuildFile; productRef = D98DCA1B2EC179F8003B9097 /* SwiftMath */; };
-		D9B57B882EC0815200D92C59 /* Appwrite in Frameworks */ = {isa = PBXBuildFile; productRef = D9B57B872EC0815200D92C59 /* Appwrite */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -29,7 +28,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				D98DCA1C2EC179F8003B9097 /* SwiftMath in Frameworks */,
-				D9B57B882EC0815200D92C59 /* Appwrite in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -72,7 +70,6 @@
 			);
 			name = "Skys The Limit";
 			packageProductDependencies = (
-				D9B57B872EC0815200D92C59 /* Appwrite */,
 				D98DCA1B2EC179F8003B9097 /* SwiftMath */,
 			);
 			productName = "Skys The Limit";
@@ -104,7 +101,6 @@
 			mainGroup = D9B57B622EC0805B00D92C59;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
-				D9B57B862EC0815200D92C59 /* XCRemoteSwiftPackageReference "sdk-for-apple" */,
 				D98DCA1A2EC179F8003B9097 /* XCRemoteSwiftPackageReference "SwiftMath" */,
 			);
 			preferredProjectObjectVersion = 77;
@@ -357,14 +353,6 @@
 				minimumVersion = 1.7.3;
 			};
 		};
-		D9B57B862EC0815200D92C59 /* XCRemoteSwiftPackageReference "sdk-for-apple" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/appwrite/sdk-for-apple.git";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 13.4.0;
-			};
-		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -372,11 +360,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = D98DCA1A2EC179F8003B9097 /* XCRemoteSwiftPackageReference "SwiftMath" */;
 			productName = SwiftMath;
-		};
-		D9B57B872EC0815200D92C59 /* Appwrite */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = D9B57B862EC0815200D92C59 /* XCRemoteSwiftPackageReference "sdk-for-apple" */;
-			productName = Appwrite;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

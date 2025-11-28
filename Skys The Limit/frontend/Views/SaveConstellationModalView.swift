@@ -26,11 +26,7 @@ struct SaveConstellationModalView: View {
                     .textFieldStyle(RoundedBorderTextFieldStyle())
                     .padding(.horizontal)
                     .font(.custom("SpaceMono-Regular", size: 38))
-
-                Toggle(isOn: $isShared) {
-                    Text("Share with others")
-                        .font(.custom("SpaceMono-Regular", size: 32))
-                }
+                
                 .padding(.horizontal)
 
                 Spacer()

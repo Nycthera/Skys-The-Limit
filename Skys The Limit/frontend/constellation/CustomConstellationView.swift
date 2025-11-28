@@ -1,4 +1,5 @@
 import SwiftUI
+import SwiftData
 import SwiftMath
 
 struct CustomConstellationView: View {
@@ -18,6 +19,8 @@ struct CustomConstellationView: View {
     @State private var startEndCoords: [String] = [""]
 
     @Environment(\.presentationMode) var presentationMode
+    @Environment(\.modelContext) private var context
+
     let ID: String
     private let sidebarWidth: CGFloat = 250
 
@@ -25,14 +28,12 @@ struct CustomConstellationView: View {
         NavigationView {
             GeometryReader { geo in
                 ZStack {
-                    // Background
                     Image("Space")
                         .resizable()
                         .scaledToFill()
                         .ignoresSafeArea()
 
                     HStack(spacing: 0) {
-                        // Sidebar
                         CustomSidebarView(
                             isCollapsed: isSidebarCollapsed,
                             equations: $arrayOfEquations,
@@ -40,10 +41,8 @@ struct CustomConstellationView: View {
                             editingIndex: $editingIndex
                         )
 
-                        // Main content
                         ScrollView {
                             VStack(spacing: 25) {
-                                // Canvas
                                 CustomGraphCanvasView(
                                     stars: stars,
                                     successfulLines: successfulLines,
@@ -56,7 +55,6 @@ struct CustomConstellationView: View {
                                 .background(Color.black.opacity(0.2))
                                 .cornerRadius(12)
 
-                                // Current input
                                 VStack(alignment: .leading) {
                                     Text("y = \(editingLatexString)")
                                         .font(.custom("SpaceMono-Regular", size: 24))
@@ -67,14 +65,12 @@ struct CustomConstellationView: View {
                                         .cornerRadius(8)
                                 }
 
-                                // Keyboard
                                 MathKeyboardView(
                                     latexString: $editingLatexString,
                                     mathString: $editingMathString
                                 )
                                 .fixedSize(horizontal: false, vertical: true)
 
-                                // Add / Update button
                                 Button {
                                     guard !editingMathString.isEmpty else { return }
 
@@ -104,8 +100,6 @@ struct CustomConstellationView: View {
                     }
                 }
             }
-
-            // Navigation bar
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
@@ -120,14 +114,12 @@ struct CustomConstellationView: View {
 
                 ToolbarItem(placement: .navigationBarTrailing) {
                     HStack(spacing: 12) {
-                        // Save
                         Button { showSaveModal = true } label: {
                             Image(systemName: "square.and.arrow.down")
                                 .font(.system(size: 20, weight: .bold))
                                 .foregroundColor(.white)
                         }
 
-                        // Back
                         Button("Back") {
                             presentationMode.wrappedValue.dismiss()
                         }
@@ -139,23 +131,13 @@ struct CustomConstellationView: View {
                     }
                 }
             }
-
-            // Load document
             .onAppear {
-                Task {
-                    if let doc = await getDocumentForUser(rowId: ID) {
-                        arrayOfEquations = doc.equations
-                        constellationName = doc.name
-                        startEndCoords = doc.startEndCords
-                    }
-                }
+                loadConstellation()
             }
             .onChange(of: arrayOfEquations) { _ in
                 updateStarsFromEquations()
             }
         }
-
-        // Save modal
         .sheet(isPresented: $showSaveModal) {
             SaveConstellationModalView(
                 isPresented: $showSaveModal,
@@ -164,17 +146,40 @@ struct CustomConstellationView: View {
                 startEndCords: $startEndCoords,
                 docID: ID,
                 onSave: {
-                    Task {
-                        await saveToAppwrite()
-                        // Dismiss modal and then return to home
-                        showSaveModal = false
-                        presentationMode.wrappedValue.dismiss()
-                    }
+                    saveConstellation()
+                    showSaveModal = false
+                    presentationMode.wrappedValue.dismiss()
                 }
             )
         }
-
         .navigationViewStyle(.stack)
+    }
+
+    // MARK: - Load from SwiftData
+    private func loadConstellation() {
+        let service = ConstellationDataService(context: context)
+        if let constellation = service.fetchConstellations(userId: UIDevice.current.identifierForVendor!.uuidString)
+            .first(where: { $0.id == ID }) {
+            arrayOfEquations = constellation.equations
+            constellationName = constellation.name
+            startEndCoords = constellation.startEndCords
+        }
+    }
+
+    // MARK: - Save to SwiftData
+    private func saveConstellation() {
+        let service = ConstellationDataService(context: context)
+        let equationsWithY = arrayOfEquations.map { $0.starts(with: "y =") ? $0 : "y = \($0)" }
+
+        if let constellation = service.fetchConstellations(userId: UIDevice.current.identifierForVendor!.uuidString)
+            .first(where: { $0.id == ID }) {
+            service.updateConstellation(
+                constellation: constellation,
+                newName: constellationName,
+                newEquations: equationsWithY,
+                newStartEndCords: startEndCoords
+            )
+        }
     }
 
     // MARK: - Star Update
@@ -189,39 +194,6 @@ struct CustomConstellationView: View {
             stars.append(contentsOf: points.map { CGPoint(x: $0.x, y: $0.y) })
             successfulLines.append(points)
         }
-    }
-
-    // MARK: - Save to Appwrite (with y= prefix)
-    private func saveToAppwrite() async {
-        do {
-            // Add 'y = ' to each equation before saving
-            let equationsWithY = arrayOfEquations.map { eq in
-                eq.starts(with: "y =") ? eq : "y = \(eq)"
-            }
-
-            try await updateUserDocument(
-                id: ID,
-                name: constellationName,
-                equations: equationsWithY,
-                startEndCoords: startEndCoords
-            )
-            print("Saved successfully with y= prefix")
-        } catch {
-            print("❌ Error saving:", error)
-        }
-    }
-
-    // MARK: - Update document wrapper (unchanged)
-    private func updateUserDocument(id: String, name: String, equations: [String], startEndCoords: [String], isShared: Bool = false) async throws {
-        let parameters = AppwriteFunctionsParameters(
-            id: id,
-            userId: deviceId,
-            name: name,
-            equations: equations,
-            isShared: isShared,
-            startEndCords: startEndCoords
-        )
-        await updateDocument(parameters: parameters)
     }
 
     // MARK: - Sidebar
