@@ -3,7 +3,7 @@ import SwiftMath
 import SwiftData
 
 struct EquationListView: View {
-    @StateObject private var viewModel = EquationPuzzleViewModel()
+    @ObservedObject var viewModel: EquationPuzzleViewModel
     @EnvironmentObject var equationStore: EquationStore
 
     @Environment(\.modelContext) private var context    // ← SwiftData context
