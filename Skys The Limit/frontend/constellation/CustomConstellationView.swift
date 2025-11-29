@@ -42,7 +42,7 @@ struct CustomConstellationView: View {
                         )
 
                         ScrollView {
-                            VStack(spacing: 25) {
+                            VStack(spacing: 15) {
                                 CustomGraphCanvasView(
                                     stars: stars,
                                     successfulLines: successfulLines,
@@ -57,12 +57,11 @@ struct CustomConstellationView: View {
 
                                 VStack(alignment: .leading) {
                                     Text("y = \(editingLatexString)")
-                                        .font(.custom("SpaceMono-Regular", size: 24))
+                                        .font(.system(size: 32))
                                         .foregroundColor(.yellow)
-                                        .padding(3)
                                         .frame(maxWidth: .infinity, alignment: .leading)
                                         .background(Color.white.opacity(0.1))
-                                        .cornerRadius(8)
+                                        .cornerRadius(12)
                                 }
 
                                 MathKeyboardView(
@@ -85,10 +84,10 @@ struct CustomConstellationView: View {
                                     editingIndex = nil
                                 } label: {
                                     Text(editingIndex != nil ? "Update Equation" : "Add Equation")
-                                        .font(.custom("SpaceMono-Regular", size: 20))
+                                        .font(.title)
                                         .frame(maxWidth: .infinity)
-                                        .padding()
-                                        .background(Color.white)
+                                        .padding(10)
+                                        .background(.white)
                                         .foregroundColor(.black)
                                         .cornerRadius(15)
                                 }
@@ -123,7 +122,7 @@ struct CustomConstellationView: View {
                         Button("Back") {
                             presentationMode.wrappedValue.dismiss()
                         }
-                        .font(.custom("SpaceMono-Regular", size: 18))
+                        .font(.headline)
                         .padding(5)
                         .background(Color.black.opacity(0.5))
                         .foregroundColor(.white)

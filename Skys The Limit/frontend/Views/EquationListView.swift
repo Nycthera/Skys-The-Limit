@@ -55,13 +55,13 @@ struct EquationListView: View {
         @State private var isConfirmingLine = false
 
         var body: some View {
-            VStack(spacing: 10){
+            VStack(spacing: 15){
 
                 if !viewModel.isPuzzleComplete &&
                     viewModel.stars.count > viewModel.currentTargetIndex + 1 {
 
                     Text("Connect Star \(viewModel.currentTargetIndex + 1) → Star \(viewModel.currentTargetIndex + 2)")
-                        .font(.custom("SpaceMono-Regular", size: 30))
+                        .font(.largeTitle)
                         .foregroundColor(.yellow)
                 }
 
@@ -79,7 +79,6 @@ struct EquationListView: View {
                     fontSize: 32
                 )
                 .frame(maxWidth: .infinity, minHeight: 30, maxHeight: 30)
-//                .padding(4)
                 .background(Color.black.opacity(0.5))
                 .cornerRadius(12)
 
@@ -100,12 +99,12 @@ struct EquationListView: View {
                     }
                 } label: {
                     Text(isConfirmingLine ? "Confirm Line" : "Check Line")
-                        .font(.largeTitle)
+                        .font(.title)
                         .frame(maxWidth: .infinity, minHeight: 10, maxHeight: 20)
                         .padding(10)
                         .background(isConfirmingLine ? Color.blue : Color.white)
                         .foregroundColor(isConfirmingLine ? .white : .black)
-                        .cornerRadius(15)
+                        .cornerRadius(12)
                 }
                 .disabled(viewModel.isPuzzleComplete)
 

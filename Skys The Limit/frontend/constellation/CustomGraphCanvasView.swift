@@ -128,10 +128,9 @@ struct CustomGraphCanvasView: View {
                 if let name {
                     VStack {
                         Text(name)
-                            .font(.custom("SpaceMono-Bold", size: 24))
+                            .font(.title)
                             .foregroundColor(.yellow)
                             .shadow(radius: 3)
-                            .padding(.top, 8)
                         Spacer()
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity)

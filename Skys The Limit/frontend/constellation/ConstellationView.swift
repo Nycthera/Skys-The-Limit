@@ -55,7 +55,7 @@ struct ConstellationView: View {
                 showModal = true
             } label: {
                 Image(systemName: "plus")
-                    .font(.system(size: 50))
+                    .font(.largeTitle)
                     .foregroundColor(.white)
                     .padding(10)
                     .background(Color.black.opacity(0.6))
