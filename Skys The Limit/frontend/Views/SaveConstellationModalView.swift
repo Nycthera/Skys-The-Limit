@@ -37,7 +37,7 @@ struct SaveConstellationModalView: View {
                         isPresented = false
                         onCancel?()
                     }
-                    .font(.custom("SpaceMono-Regular", size: 28))
+                    .font(.headline)
                     .frame(maxWidth: .infinity)
                     .padding()
                     .background(Color.gray.opacity(0.6))
@@ -50,7 +50,7 @@ struct SaveConstellationModalView: View {
                         onSave?()
                         isPresented = false
                     }
-                    .font(.custom("SpaceMono-Bold", size: 28))
+                    .font(.headline)
                     .frame(maxWidth: .infinity)
                     .padding()
                     .background(Color.blue)
