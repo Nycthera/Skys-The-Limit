@@ -1,6 +1,6 @@
 import Foundation
 import SwiftData
-import JSONCodable
+//import JSONCodable
 
 // MARK: - SwiftData Model
 @Model

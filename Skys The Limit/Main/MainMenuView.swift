@@ -22,7 +22,7 @@ struct MainMenuView: View {
                     .resizable()
                     .aspectRatio(contentMode: .fit)
                 
-                NavigationLink(destination:  EquationListView()) {
+                NavigationLink(destination:  DrawStarsMainView()) {
                     Text("Draw The Stars")
                 }
                 .foregroundStyle(.white)
