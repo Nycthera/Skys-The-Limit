@@ -55,8 +55,8 @@ struct MathKeyboardView: View {
             MathKey(display: "0", mathValue: "0", type: .character),
             MathKey(display: "x", mathValue: "x", type: .character),
             MathKey(display: "y", mathValue: "y", type: .character),
-            MathKey(display: "/", mathValue: "/", type: .character),
-
+            
+//            MathKey(display: "/", mathValue: "/", type: .character),
             //                MathKey(display: "=", mathValue: "=", type: .character),
             //                MathKey(display: "{", mathValue: "{", type: .character),
             //                MathKey(display: "}", mathValue: "}", type: .character),
@@ -86,16 +86,11 @@ struct MathKeyboardView: View {
                                             RoundedRectangle(cornerRadius: 16)
                                                 .fill(
                                                     LinearGradient(
-                                                        gradient: Gradient(colors: key.type == .backspace ? [Color.red.opacity(0.9), Color.red.opacity(0.6)] : [Color.white.opacity(0.25), Color.white.opacity(0.05)]),
+                                                        gradient: Gradient(colors: key.type == .backspace ? [Color.red.opacity(0.9), Color.red.opacity(0.6)] : [Color.white.opacity(0.35), Color.white.opacity(0.15)]),
                                                         startPoint: .topLeading,
                                                         endPoint: .bottomTrailing
                                                     )
                                                 )
-                                                .background(.ultraThinMaterial)
-                                                .shadow(color: Color.black.opacity(0.2), radius: 4, x: 0, y: 2)
-
-                                            RoundedRectangle(cornerRadius: 16)
-                                                .stroke(Color.white.opacity(0.3), lineWidth: 1)
                                         }
                                     )
                                     .contentShape(RoundedRectangle(cornerRadius: 16))
@@ -114,7 +109,6 @@ struct MathKeyboardView: View {
             .padding(12)
             .background(.ultraThinMaterial)
             .cornerRadius(24)
-            .padding(.horizontal, 12)
         }
         .frame(height: 260)
     }
