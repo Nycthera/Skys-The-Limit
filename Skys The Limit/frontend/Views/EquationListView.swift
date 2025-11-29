@@ -49,6 +49,9 @@ struct EquationListView: View {
     //                     GAME AREA VIEW
     // ==========================================================
     private struct GameAreaView: View {
+        @State private var showToast = false
+        @State private var toastMessage = ""
+
         @ObservedObject var viewModel: EquationPuzzleViewModel
         @Binding var currentMathString: String
         let canvasHeight: CGFloat
@@ -88,27 +91,49 @@ struct EquationListView: View {
                 )
 
                 Button {
-                    if !isConfirmingLine {
-                        viewModel.checkCurrentLineSolution()
+                    let previousIndex = viewModel.currentTargetIndex
+                    
+                    viewModel.checkCurrentLineSolution()
+
+                    let success = viewModel.currentTargetIndex > previousIndex
+
+                    if !success {
                         viewModel.updateUserGraph()
-                        isConfirmingLine = true
+                        showToast = true
+                        toastMessage = "Wrong Equation!"
+
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                            showToast = false
+                        }
                     } else {
-                        viewModel.checkCurrentLineSolution()
                         viewModel.updateUserGraph()
-                        isConfirmingLine = false
                     }
+
                 } label: {
-                    Text(isConfirmingLine ? "Confirm Line" : "Check Line")
+                    Text("Check Line")
                         .font(.title)
-                        .frame(maxWidth: .infinity, minHeight: 10, maxHeight: 20)
                         .padding(10)
-                        .background(isConfirmingLine ? Color.blue : Color.white)
-                        .foregroundColor(isConfirmingLine ? .white : .black)
+                        .background(Color.white)
+                        .foregroundColor(.black)
                         .cornerRadius(12)
+                        .frame(maxWidth: .infinity)
                 }
                 .disabled(viewModel.isPuzzleComplete)
 
             }
+            .overlay(alignment: .top) {
+                if showToast {
+                    Text(toastMessage)
+                        .foregroundColor(.white)
+                        .padding()
+                        .background(.red.opacity(0.8))
+                        .cornerRadius(12)
+                        .padding(.top, 16)
+                        .transition(.move(edge: .top).combined(with: .opacity))
+                }
+            }
+            .animation(.easeInOut, value: showToast)
+
         }
     }
 }

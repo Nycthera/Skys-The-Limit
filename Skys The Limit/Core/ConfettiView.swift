@@ -15,7 +15,7 @@ struct ConfettiView: UIViewRepresentable {
         let emitterLayer = CAEmitterLayer()
 //        emitterLayer.frame = view.bounds
 
-        emitterLayer.emitterPosition = CGPoint(x: UIScreen.main.bounds.width / 2, y: -500)
+        emitterLayer.emitterPosition = CGPoint(x: UIScreen.main.bounds.width / 2, y: -1000)
         emitterLayer.emitterSize = CGSize(width: view.bounds.size.width, height: 2)
         emitterLayer.emitterShape = .line
 
