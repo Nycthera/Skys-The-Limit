@@ -57,8 +57,8 @@ struct SaveConstellationModalView: View {
                     .foregroundColor(.white)
                     .cornerRadius(14)
                 }
-                .padding(.horizontal)
-                .padding(.bottom, 25)
+//                .padding(.horizontal)
+//                .padding(.bottom, 25)
             }
             .navigationBarHidden(true)
         }

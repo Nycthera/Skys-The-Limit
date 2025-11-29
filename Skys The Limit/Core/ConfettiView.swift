@@ -13,9 +13,9 @@ struct ConfettiView: UIViewRepresentable {
     func makeUIView(context: Context) -> some UIView {
         let view = UIView()
         let emitterLayer = CAEmitterLayer()
-        emitterLayer.frame = view.bounds
+//        emitterLayer.frame = view.bounds
 
-        emitterLayer.emitterPosition = CGPoint(x: UIScreen.main.bounds.width / 2, y: -50)
+        emitterLayer.emitterPosition = CGPoint(x: UIScreen.main.bounds.width / 2, y: -500)
         emitterLayer.emitterSize = CGSize(width: view.bounds.size.width, height: 2)
         emitterLayer.emitterShape = .line
 
@@ -45,13 +45,13 @@ struct ConfettiView: UIViewRepresentable {
                     let cell = CAEmitterCell()
                     let confetti = ConfettiType(color: color, shape: shape, position: position)
                     cell.contents = confetti.image.cgImage
-                    cell.birthRate = 20
-                    cell.lifetime = 5
+                    cell.birthRate = 40
+                    cell.lifetime = 10
                     cell.velocity = 100
-                    cell.emissionRange = -.pi / 4
-                    cell.emissionLongitude = -.pi
+                    cell.emissionRange = -.pi * 10
+                    cell.emissionLongitude = -.pi * 10
                     cell.spin = 2
-                    cell.spinRange = 1
+                    cell.spinRange = 10
                     cell.scale = 0.6
                     cell.scaleRange = 0.3
                     cell.yAcceleration = 50

@@ -9,14 +9,15 @@ struct SaveConstellationModalSheetView: View {
         NavigationView {
             Form {
                 Section(header: Text("Name Your Constellation")
-                            .font(.custom("SpaceMono-Bold", size: 24))) { // bigger header
+                    .font(.largeTitle)
+                ) { // bigger header
                     TextField("e.g. Orion II", text: $name)
-                        .font(.custom("SpaceMono-Regular", size: 20)) // bigger input text
-                        .padding(.vertical, 5)
+                        .font(.caption) // bigger input text
+//                        .padding(.vertical, 5)
                 }
             }
-            .navigationTitle(Text("Save Constellation")
-                                .font(.custom("SpaceMono-Bold", size: 28))) // bigger nav title
+            .navigationTitle(Text("Save Constellation"))
+                .font(.largeTitle) // bigger nav title
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Save") {
@@ -25,11 +26,11 @@ struct SaveConstellationModalSheetView: View {
                             dismiss()
                         }
                     }
-                    .font(.custom("SpaceMono-Bold", size: 20)) // bigger button
+                    .font(.title)
                 }
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") { dismiss() }
-                        .font(.custom("SpaceMono-Regular", size: 20)) // bigger button
+                        .font(.title)
                 }
             }
         }
