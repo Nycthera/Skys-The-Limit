@@ -2,27 +2,51 @@ name: Lint and Format Swift Code
 
 on:
   push:
-    branches:
-      - main
+    branches: [ main ]
   pull_request:
-    branches:
-      - main
+    branches: [ main ]
 
 jobs:
   lint-and-format:
     runs-on: macos-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-      # Install Homebrew and tools
-      - name: Install Homebrew, SwiftLint & SwiftFormat
+      # --------------------------------------------------
+      # Cache Homebrew packages for faster builds
+      # --------------------------------------------------
+      - name: Cache Homebrew
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/Library/Caches/Homebrew
+            /usr/local/Homebrew
+            /opt/homebrew
+          key: ${{ runner.os }}-brew-${{ hashFiles('.github/workflows/lint.yml') }}
+          restore-keys: |
+            ${{ runner.os }}-brew-
+
+      # --------------------------------------------------
+      # Install tools (only installs missing ones)
+      # --------------------------------------------------
+      - name: Install SwiftLint & SwiftFormat
         run: |
-          /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-          echo 'export PATH="/opt/homebrew/bin:$PATH"' >> $GITHUB_ENV
-          export PATH="/opt/homebrew/bin:$PATH"
+          brew update
           brew install swiftlint swiftformat
 
-      # Remove trailing whitespace automatically
-      - name: Remove trailing whitespace
-        run: swiftlint lint --fix
+      # --------------------------------------------------
+      # Run SwiftFormat (modify code)
+      # --------------------------------------------------
+      - name: Run SwiftFormat
+        run: |
+          swiftformat . --swiftversion 5.9
+        continue-on-error: false
+
+      # --------------------------------------------------
+      # Run SwiftLint (report issues)
+      # --------------------------------------------------
+      - name: Run SwiftLint
+        run: |
+          swiftlint lint --reporter github-actions-logging
