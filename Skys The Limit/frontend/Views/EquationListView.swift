@@ -110,7 +110,7 @@ struct EquationListView: View {
                     }
 
                 } label: {
-                    Text("Check Line")
+                    Text("Draw Line")
                         .font(.title)
                         .padding(10)
                         .background(Color.white)
