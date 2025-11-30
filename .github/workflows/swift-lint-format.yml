@@ -7,46 +7,37 @@ on:
     branches: [ main ]
 
 jobs:
-  lint-and-format:
+  lint:
     runs-on: macos-latest
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
 
-      # --------------------------------------------------
-      # Cache Homebrew packages for faster builds
-      # --------------------------------------------------
-      - name: Cache Homebrew
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~/Library/Caches/Homebrew
-            /usr/local/Homebrew
-            /opt/homebrew
-          key: ${{ runner.os }}-brew-${{ hashFiles('.github/workflows/lint.yml') }}
-          restore-keys: |
-            ${{ runner.os }}-brew-
-
-      # --------------------------------------------------
-      # Install tools (only installs missing ones)
-      # --------------------------------------------------
+      # Install SwiftLint & SwiftFormat using Homebrew
       - name: Install SwiftLint & SwiftFormat
         run: |
-          brew update
           brew install swiftlint swiftformat
 
-      # --------------------------------------------------
-      # Run SwiftFormat (modify code)
-      # --------------------------------------------------
+      # Run SwiftFormat first (formats code automatically)
       - name: Run SwiftFormat
         run: |
           swiftformat . --swiftversion 5.9
-        continue-on-error: false
-
-      # --------------------------------------------------
-      # Run SwiftLint (report issues)
-      # --------------------------------------------------
-      - name: Run SwiftLint
+          
+      # Run SwiftLint using your custom config
+      - name: Run SwiftLint (Auto-Fix)
         run: |
-          swiftlint lint --reporter github-actions-logging
+          swiftlint lint --fix --config .swiftlint.yml
+
+      # Run SwiftLint one more time to surface any remaining errors
+      - name: Run SwiftLint (Final Check)
+        run: |
+          swiftlint lint --config .swiftlint.yml --reporter github-actions-logging
+
+      # Upload SwiftLint report (optional but useful)
+      - name: Upload SwiftLint Report
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: swiftlint-report
+          path: swiftlint.log

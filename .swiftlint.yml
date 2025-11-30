@@ -1,0 +1,59 @@
+disabled_rules:
+  - type_name
+  - identifier_name
+  - line_length
+  - function_body_length
+  - file_length
+  - large_tuple
+  - nesting
+
+# Allow very short variable names (x, y, p, dx, dy, etc.)
+identifier_name:
+  allowed_symbols: ["x", "y", "p", "dx", "dy", "sx", "sy", "ex", "ey"]
+  min_length: 1
+  max_length: 50
+
+# Allow long type names since you use Appwrite / SwiftData models
+type_name:
+  min_length: 1
+  max_length: 60
+  allowed_symbols: ["_"]   # Allow snake_case (Skys_The_LimitApp)
+
+line_length:
+  ignores_comments: true
+  ignores_urls: true
+  ignores_function_declarations: true
+  ignores_interpolated_strings: true
+
+# Exclude your external SDKs and generated folders (add paths if needed)
+excluded:
+  - Carthage
+  - Pods
+  - .build
+  - DerivedData
+  - Generated
+  - Scripts
+  - AppwriteModels
+
+# Overrides for SwiftUI "body" and large View files
+type_body_length:
+  warning: 500
+  error: 2000
+
+function_body_length:
+  warning: 200
+  error: 500
+
+file_length:
+  warning: 800
+  error: 2000
+
+# Improve SwiftUI readability
+trailing_whitespace:
+  ignores_empty_lines: true
+
+# Optional: Relax cyclomatic complexity for advanced math logic
+cyclomatic_complexity:
+  ignores_case_statements: true
+  warning: 30
+  error: 50
