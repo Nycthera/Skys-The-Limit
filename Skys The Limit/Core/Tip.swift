@@ -8,7 +8,7 @@
 import Foundation
 import TipKit
 
-//tip view
+//done
 struct DeleteConstellationTip: Tip {
     
     var title: Text {
@@ -22,7 +22,7 @@ struct DeleteConstellationTip: Tip {
     }
 }
 
-//pop over tip
+//done
 struct EditEquationTip: Tip {
     static let editEquationEvent = Event(id: "editEquation")
     static let customConstellationViewVisitedEvent = Event(id: "customConstellationViewVisited")
@@ -48,9 +48,11 @@ struct EditEquationTip: Tip {
     }
 }
 
-struct StarCoordinates: Tip {
+//done
+struct StarCoordinatesTip: Tip {
+    
     var title: Text {
-        Text("Edit Equation")
+        Text("See Coordinates")
     }
     var message: Text? {
         Text("Tap on a star to see its coordinates")
@@ -59,25 +61,6 @@ struct StarCoordinates: Tip {
         Image(systemName: "star.fill")
     }
     
-    var rules: [Rule] {
-         
-    }
-}
-
-struct AddEquation: Tip {
-    var title: Text {
-        Text("Add New Equation")
-    }
-    var message: Text? {
-        Text("Press this button to add a new equation to the constellation")
-    }
-    var image: Image? {
-        Image(systemName: "pencil.and.scribble")
-    }
-    
-    var rules: [Rule] {
-         
-    }
 }
 
 

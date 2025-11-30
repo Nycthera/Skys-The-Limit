@@ -9,13 +9,12 @@ struct ContentView: View {
             MainMenuView()
                 .task {
                     try? Tips.configure([
-//                        .displayFrequency(.immediate)
                         .datastoreLocation(.applicationDefault)
                     ])
                     
-                    //this is for testing tips make sure to remove later so th tip does not repeatedly appear everthing you restart the app
-                    try? Tips.resetDatastore()
-                    try? Tips.showAllTipsForTesting()
+//                    //this is for testing tips make sure to remove later so th tip does not repeatedly appear everthing you restart the app
+//                    try? Tips.resetDatastore()
+//                    try? Tips.showAllTipsForTesting()
                 }
         }
 

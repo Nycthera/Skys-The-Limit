@@ -4,15 +4,10 @@ import SwiftMath
 import TipKit
 
 struct CustomConstellationView: View {
-    // MARK: - State
-//    @State private var arrayOfEquations: [String] = []
-    
+    let editEquationTip = EditEquationTip()
+
     @State private var stars: [CGPoint] = []
     @State private var successfulLines: [[(x: Double, y: Double)]] = []
-
-//    @State private var editingLatexString: String = ""
-//    @State private var editingMathString: String = ""
-//    @State private var editingIndex: Int?
 
     @State private var showSaveModal = false
 
@@ -41,6 +36,7 @@ struct CustomConstellationView: View {
                         .ignoresSafeArea()
 
                         ScrollView {
+                            
                             VStack(spacing: 15) {
                                 CustomGraphCanvasView(
                                     stars: stars,
@@ -55,14 +51,14 @@ struct CustomConstellationView: View {
                                 .cornerRadius(12)
 
                                 VStack(alignment: .leading) {
-                                    Text("y = \(editingLatexString)")
+                                    Text(editingLatexString)
                                         .font(.system(size: 32))
                                         .foregroundColor(.yellow)
                                         .frame(maxWidth: .infinity, alignment: .leading)
                                         .background(Color.white.opacity(0.1))
                                         .cornerRadius(12)
                                 }
-
+                                
                                 MathKeyboardView(
                                     latexString: $editingLatexString,
                                     mathString: $editingMathString
