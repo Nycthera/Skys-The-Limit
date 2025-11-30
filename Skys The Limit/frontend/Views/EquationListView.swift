@@ -9,7 +9,6 @@ struct EquationListView: View {
     @Environment(\.modelContext) private var context    // ← SwiftData context
 
     @State private var currentMathString: String = ""
-    @State private var isSidebarCollapsed: Bool = false
 
     // confetti stuff
     @State private var isCelebrating = false
@@ -37,10 +36,9 @@ struct EquationListView: View {
                     GameAreaView(
                         viewModel: viewModel,
                         currentMathString: $currentMathString,
-                        canvasHeight: geometry.size.height * 0.18
+                        canvasHeight: geometry.size.height * 0.25
                     )
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
-//                    .padding()
             }
         }
     }
@@ -58,7 +56,7 @@ struct EquationListView: View {
         @State private var isConfirmingLine = false
 
         var body: some View {
-            VStack(spacing: 15){
+            VStack(spacing: 10){
 
                 if !viewModel.isPuzzleComplete &&
                     viewModel.stars.count > viewModel.currentTargetIndex + 1 {
@@ -76,10 +74,11 @@ struct EquationListView: View {
                     connectedStarIndices: viewModel.connectedStarIndices
                 )
                 .frame(height: canvasHeight)
-
+//                .frame(height: geo.size.height * 0.5)
+                
                 MathView(
                     equation: viewModel.currentLatexString,
-                    fontSize: 32
+                    fontSize: 31
                 )
                 .frame(maxWidth: .infinity, minHeight: 30, maxHeight: 30)
                 .background(Color.black.opacity(0.5))
@@ -112,15 +111,15 @@ struct EquationListView: View {
                 } label: {
                     Text("Draw Line")
                         .font(.title)
-                        .padding(10)
-                        .background(Color.white)
-                        .foregroundColor(.black)
-                        .cornerRadius(12)
                         .frame(maxWidth: .infinity)
+                        .padding(10)
+                        .background(.white)
+                        .foregroundColor(.black)
+                        .cornerRadius(15)
                 }
                 .disabled(viewModel.isPuzzleComplete)
-
             }
+            
             .overlay(alignment: .top) {
                 if showToast {
                     Text(toastMessage)

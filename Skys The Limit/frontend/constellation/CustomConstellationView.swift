@@ -39,8 +39,8 @@ struct CustomConstellationView: View {
                         .ignoresSafeArea()
 
                         ScrollView {
-                            
-                            VStack(spacing: 15) {
+                            //game area
+                            VStack(spacing: 10) {
                                 CustomGraphCanvasView(
                                     stars: stars,
                                     successfulLines: successfulLines,
@@ -53,12 +53,12 @@ struct CustomConstellationView: View {
                                 .background(Color.black.opacity(0.2))
                                 .cornerRadius(12)
 
-                                VStack(alignment: .leading) {
-                                    Text(editingLatexString)
-                                        .font(.system(size: 32))
-                                        .foregroundColor(.yellow)
-                                        .frame(maxWidth: .infinity, alignment: .leading)
-                                        .background(Color.white.opacity(0.1))
+                                VStack(alignment: .center) {
+                                    Text("y = \(editingLatexString)")
+                                        .font(.system(size: 31))
+                                        .foregroundColor(.white)
+                                        .frame(maxWidth: .infinity)
+                                        .background(Color.black.opacity(0.5))
                                         .cornerRadius(12)
                                 }
                                 
