@@ -1,6 +1,7 @@
 import SwiftUI
 import SwiftData
 import SwiftMath
+import TipKit
 
 struct CustomConstellationView: View {
     // MARK: - State
@@ -82,7 +83,10 @@ struct CustomConstellationView: View {
                                     editingLatexString = ""
                                     editingMathString = ""
                                     editingIndex = nil
-                                } label: {
+                                    
+                                    Task { await EditEquationTip.editEquationEvent.donate()}
+                                        
+                                    } label: {
                                     Text(editingIndex != nil ? "Update Equation" : "Add Equation")
                                         .font(.title)
                                         .frame(maxWidth: .infinity)
@@ -101,24 +105,7 @@ struct CustomConstellationView: View {
             }
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button {
-                        withAnimation(.easeInOut) { isSidebarCollapsed.toggle() }
-                    } label: {
-                        Image(systemName: "sidebar.left")
-                            .font(.system(size: 25))
-                            .foregroundColor(.white)
-                    }
-                }
-
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    HStack(spacing: 12) {
-                        Button { showSaveModal = true } label: {
-                            Image(systemName: "square.and.arrow.down")
-                                .font(.system(size: 20, weight: .bold))
-                                .foregroundColor(.white)
-                        }
-
                         Button("Back") {
                             presentationMode.wrappedValue.dismiss()
                         }
@@ -127,11 +114,12 @@ struct CustomConstellationView: View {
                         .background(Color.black.opacity(0.5))
                         .foregroundColor(.white)
                         .cornerRadius(8)
-                    }
+                    
                 }
             }
             .onAppear {
                 loadConstellation()
+                Task { await EditEquationTip.customConstellationViewVisitedEvent.donate()}
             }
             .onChange(of: arrayOfEquations) { _ in
                 updateStarsFromEquations()
@@ -240,6 +228,7 @@ struct CustomConstellationView: View {
                         }
                         .padding(.horizontal, 8)
                     }
+                    
                 }
 
                 Spacer()

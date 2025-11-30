@@ -1,9 +1,5 @@
 import SwiftUI
-// to do
-// im gonna cry
-// 1. add tutorials
-// 2. fix line rendering
-// 3. stuff ig fix ui
+import TipKit
 
 struct ContentView: View {
     var body: some View {
@@ -11,6 +7,16 @@ struct ContentView: View {
         NavigationView {
             // It starts by showing the WelcomeView.
             MainMenuView()
+                .task {
+                    try? Tips.configure([
+//                        .displayFrequency(.immediate)
+                        .datastoreLocation(.applicationDefault)
+                    ])
+                    
+                    //this is for testing tips make sure to remove later so th tip does not repeatedly appear everthing you restart the app
+                    try? Tips.resetDatastore()
+                    try? Tips.showAllTipsForTesting()
+                }
         }
 
         .navigationBarHidden(true)

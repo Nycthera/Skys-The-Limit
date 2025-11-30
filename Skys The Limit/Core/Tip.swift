@@ -5,44 +5,28 @@
 //  Created by Hailey Tan on 30/11/25.
 //
 
-import SwiftUI
+import Foundation
 import TipKit
 
-//struct Tippy: Tip {
-//    var title: Text {
-//        Text("Tippyity")
-//    }
-//    var message: Text? {
-//        Text("Add new tip")
-//    }
-//    var image: Image? {
-//        Image(systemName: "paintpalette")
-//    }
-//    
-//    var rules: [Rule] {
-//         
-//    }
-//}
-
-//pop
-struct DeleteConstellation: Tip {
+//tip view
+struct DeleteConstellationTip: Tip {
+    
     var title: Text {
         Text("Delete Constellation")
     }
     var message: Text? {
-        Text("Press and hold to delete constellation")
+        Text("Press and hold to delete a constellation")
     }
     var image: Image? {
         Image(systemName: "trash")
     }
-    
-    var rules: [Rule] {
-         
-    }
 }
 
-//tipview
-struct EditEquation: Tip {
+//pop over tip
+struct EditEquationTip: Tip {
+    static let editEquationEvent = Event(id: "editEquation")
+    static let customConstellationViewVisitedEvent = Event(id: "customConstellationViewVisited")
+    
     var title: Text {
         Text("Edit Equation")
     }
@@ -54,7 +38,13 @@ struct EditEquation: Tip {
     }
     
     var rules: [Rule] {
-         
+        #Rule(Self.editEquationEvent) { event in
+            event.donations.count == 0
+        }
+        
+        #Rule(Self.customConstellationViewVisitedEvent) { event in
+            event.donations.count > 2
+        }
     }
 }
 
