@@ -3,7 +3,7 @@ import SwiftData
 import SwiftMath
 import TipKit
 
-struct ConstellationView: View {
+struct MyConstellationView: View {
     let deleteConstellationTip = DeleteConstellationTip()
     
     @Environment(\.modelContext) private var context
@@ -86,7 +86,7 @@ struct ConstellationView: View {
             }
         }
         .fullScreenCover(item: $selectedConstellation) { constellation in
-            MyConstellationMainView(ID: constellation.id)
+            SavedConstellationMainView(ID: constellation.id)
         }
         .alert("Delete Constellation?", isPresented: $showDeleteAlert) {
             Button("Delete", role: .destructive) {
@@ -147,6 +147,6 @@ private struct ConstellationCellView: View {
 }
 
 #Preview {
-    ConstellationView()
+    MyConstellationView()
         .modelContainer(for: ConstellationModel.self)
 }

@@ -29,7 +29,7 @@ struct MainMenuView: View {
                 .font(.largeTitle)
                
                 
-                NavigationLink(destination:  ConstellationView()) {
+                NavigationLink(destination:  MyConstellationView()) {
                     Text("My Galaxy")
                 }
                 .foregroundStyle(.white)
