@@ -65,7 +65,7 @@ struct MyConstellationView: View {
                     .font(.largeTitle)
                     .foregroundColor(.white)
                     .padding(10)
-                    .background(Color.black.opacity(0.6))
+                    .background(.regularMaterial)
                     .clipShape(Circle())
             }
             .padding(20)

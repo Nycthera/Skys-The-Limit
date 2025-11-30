@@ -24,6 +24,9 @@ struct CustomConstellationView: View {
      @Binding var editingMathString: String
      @Binding var editingIndex: Int?
     
+    @Environment(\.dismiss) var dismiss
+
+    
     private let sidebarWidth: CGFloat = 250
 
     var body: some View {
