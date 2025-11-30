@@ -14,12 +14,10 @@ struct MyConstellationView: View {
     @State private var showModal = false
     @State private var constellationName = ""
     @State private var numberOfStars: Int?
-//    @State private var isShared = false
+    //    @State private var isShared = false
     
     @State private var selectedConstellation: ConstellationModel?
-    @State private var showDeleteAlert = false
-    @State private var constellationToDelete: ConstellationModel?
-    
+    @Namespace var namespace
     private var deviceId: String { UIDevice.current.identifierForVendor?.uuidString ?? "unknown_device" }
     
     private static let gridColumns: [GridItem] = [
@@ -27,88 +25,75 @@ struct MyConstellationView: View {
         GridItem(.flexible(minimum: 0, maximum: .infinity), spacing: 16)
     ]
     
-    // Filtered list for the current user
-    private var constellationsList: [ConstellationModel] {
-        allConstellations.filter { $0.userId == deviceId }
-    }
-    
     var body: some View {
-        ZStack(alignment: .bottomTrailing) {
-            Image("Space")
-                .resizable()
-                .ignoresSafeArea()
-            
-            VStack {
-                TipView(deleteConstellationTip)
-                    .tipBackground(.white.opacity(0.7))
-                ScrollView {
-                    LazyVGrid(columns: Self.gridColumns, spacing: 20) {
-                        ForEach(constellationsList) { constellation in
-                            ConstellationCellView(constellation: constellation)
-                                .onTapGesture {
-                                    selectedConstellation = constellation
-                                }
-                                .onLongPressGesture(minimumDuration: 0.5) {
-                                    constellationToDelete = constellation
-                                    showDeleteAlert = true
-                                }
+        NavigationStack {
+            ZStack(alignment: .bottomTrailing) {
+                Image("Space")
+                    .resizable()
+                    .ignoresSafeArea()
+                
+                VStack {
+                    TipView(deleteConstellationTip)
+                        .tipBackground(.white.opacity(0.7))
+                    ScrollView {
+                        LazyVGrid(columns: Self.gridColumns, spacing: 20) {
+                            ForEach(allConstellations) { constellation in
+                                ConstellationCellView(constellation: constellation)
+                                    .onTapGesture {
+                                        selectedConstellation = constellation
+                                    }
+                                    .contextMenu {
+                                        Button("Delete Constellation", systemImage: "trash", role: .destructive) {
+                                            context.delete(constellation)
+                                            try? context.save()
+                                        }
+                                    }
+                                    .matchedTransitionSource(id: constellation.id, in: namespace)
+                            }
                         }
+                        .padding()
                     }
-                    .padding()
+                }
+                
+                Button {
+                    showModal = true
+                } label: {
+                    Image(systemName: "plus")
+                        .font(.largeTitle)
+                        .foregroundColor(.white)
+                        .padding(10)
+                        .background(.regularMaterial)
+                        .clipShape(Circle())
+                }
+                .padding(20)
+                .sheet(isPresented: $showModal) {
+                    ConstellationModalView(
+                        name: $constellationName,
+                        numberOfStars: Binding(
+                            get: { numberOfStars.map(String.init) ?? "" },
+                            set: { newValue in
+                                let trimmed = newValue.trimmingCharacters(in: .whitespaces)
+                                numberOfStars = Int(trimmed)
+                            }
+                        ),
+                        //                    isShared: $isShared
+                    ) {
+                        openLatestConstellation()
+                    }
                 }
             }
-            
-            Button {
-                showModal = true
-            } label: {
-                Image(systemName: "plus")
-                    .font(.largeTitle)
-                    .foregroundColor(.white)
-                    .padding(10)
-                    .background(.regularMaterial)
-                    .clipShape(Circle())
+            .navigationDestination(item: $selectedConstellation) { constellation in
+                SavedConstellationMainView(consetallionModal: constellation)
+                    .navigationTransition(.zoom(sourceID: constellation.id, in: namespace))
             }
-            .padding(20)
-            .sheet(isPresented: $showModal) {
-                ConstellationModalView(
-                    name: $constellationName,
-                    numberOfStars: Binding(
-                        get: { numberOfStars.map(String.init) ?? "" },
-                        set: { newValue in
-                            let trimmed = newValue.trimmingCharacters(in: .whitespaces)
-                            numberOfStars = Int(trimmed)
-                        }
-                    ),
-//                    isShared: $isShared
-                ) {
-                    openLatestConstellation()
-                }
-            }
-        }
-        .fullScreenCover(item: $selectedConstellation) { constellation in
-            SavedConstellationMainView(ID: constellation.id)
-        }
-        .alert("Delete Constellation?", isPresented: $showDeleteAlert) {
-            Button("Delete", role: .destructive) {
-                if let c = constellationToDelete {
-                    let service = ConstellationDataService(context: context)
-                    service.deleteConstellation(c)
-                }
-                deleteConstellationTip.invalidate(reason: .actionPerformed)
-            }
-            Button("Cancel", role: .cancel) {
-                deleteConstellationTip.invalidate(reason: .actionPerformed)
-            }
-        } message: {
-            Text("Are you sure you want to delete “\(constellationToDelete?.name ?? "")”?")
         }
     }
     
     func openLatestConstellation() {
-        let latest = constellationsList.last
+        let latest = allConstellations.last
         selectedConstellation = latest
     }
-
+    
 }
 
 // ==========================================================

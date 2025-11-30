@@ -5,162 +5,107 @@ import TipKit
 
 struct CustomConstellationView: View {
     let editEquationTip = EditEquationTip()
-
+    
     @State private var stars: [CGPoint] = []
     @State private var successfulLines: [[(x: Double, y: Double)]] = []
-
+    
     @State private var showSaveModal = false
-
-    @State private var constellationName: String = ""
-    @State private var startEndCoords: [String] = [""]
-
+    
     @Environment(\.presentationMode) var presentationMode
     @Environment(\.modelContext) private var context
-
-    let ID: String
-     
-     @Binding var arrayOfEquations: [String]
-     @Binding var editingLatexString: String
-     @Binding var editingMathString: String
-     @Binding var editingIndex: Int?
+    
+    @Binding var editingLatexString: String
+    @Binding var editingMathString: String
+    @Binding var editingIndex: Int?
+    @Bindable var consetallionModal: ConstellationModel
     
     @Environment(\.dismiss) var dismiss
-
+    
     
     private let sidebarWidth: CGFloat = 250
-
+    
     var body: some View {
-        NavigationView {
-            GeometryReader { geo in
-                ZStack {
-                    Image("Space")
-                        .resizable()
-                        .scaledToFill()
-                        .ignoresSafeArea()
-
-                        ScrollView {
-                            //game area
-                            VStack(spacing: 10) {
-                                CustomGraphCanvasView(
-                                    stars: stars,
-                                    successfulLines: successfulLines,
-                                    equations: arrayOfEquations,
-                                    ID: ID,
-                                    name: constellationName,
-                                    startEndCoords: startEndCoords
-                                )
-                                .frame(height: geo.size.height * 0.5)
-                                .background(Color.black.opacity(0.2))
-                                .cornerRadius(12)
-
-                                VStack(alignment: .center) {
-                                    Text("y = \(editingLatexString)")
-                                        .font(.system(size: 31))
-                                        .foregroundColor(.white)
-                                        .frame(maxWidth: .infinity)
-                                        .background(Color.black.opacity(0.5))
-                                        .cornerRadius(12)
-                                }
-                                
-                                MathKeyboardView(
-                                    latexString: $editingLatexString,
-                                    mathString: $editingMathString
-                                )
-                                .fixedSize(horizontal: false, vertical: true)
-
-                                Button {
-                                    guard !editingMathString.isEmpty else { return }
-
-                                    if let index = editingIndex {
-                                        arrayOfEquations[index] = editingMathString
-                                    } else {
-                                        arrayOfEquations.append(editingMathString)
-                                    }
-
-                                    editingLatexString = ""
-                                    editingMathString = ""
-                                    editingIndex = nil
-                                    
-                                    Task { await EditEquationTip.editEquationEvent.donate()}
-                                        
-                                    } label: {
-                                    Text(editingIndex != nil ? "Update Equation" : "Add Equation")
-                                        .font(.title)
-                                        .frame(maxWidth: .infinity)
-                                        .padding(10)
-                                        .background(.white)
-                                        .foregroundColor(.black)
-                                        .cornerRadius(15)
-                                }
-                            }
-                            .padding()
-                            .frame(maxHeight: .infinity, alignment: .top)
-                        }
-                    
-                }
-            }
-            .navigationBarTitleDisplayMode(.inline)
-            .onAppear {
-                loadConstellation()
-                Task { await EditEquationTip.customConstellationViewVisitedEvent.donate()}
-            }
-            .onChange(of: arrayOfEquations) { _ in
-                updateStarsFromEquations()
-            }
-        }
-        .sheet(isPresented: $showSaveModal) {
-            SaveConstellationModalView(
-                isPresented: $showSaveModal,
-                equations: $arrayOfEquations,
-                constellationName: $constellationName,
-                startEndCords: $startEndCoords,
-                docID: ID,
-                onSave: {
-                    saveConstellation()
-                    showSaveModal = false
-                    presentationMode.wrappedValue.dismiss()
-                }
+        
+        
+        //game area
+        VStack(spacing: 10) {
+            CustomGraphCanvasView(stars: stars, successfulLines: successfulLines, consetallionModal: consetallionModal)
+            .background(Color.black.opacity(0.2))
+            .cornerRadius(12)
+            
+            Spacer()
+                  
+                MathView(
+                    equation: "y=\(editingMathString)",
+                    fontSize: 31
+                )
+                .foregroundColor(.white)
+                .frame(maxWidth: .infinity)
+                .frame(height: 48)
+                .background(Color.black.opacity(0.5))
+                .cornerRadius(12)
+            
+            
+            MathKeyboardView(
+                latexString: $editingLatexString,
+                mathString: $editingMathString
             )
+            .fixedSize(horizontal: false, vertical: true)
+            
+            Button {
+                guard !editingMathString.isEmpty else { return }
+                
+                if let index = editingIndex {
+                    consetallionModal.equations[index] = editingMathString
+                } else {
+                    consetallionModal.equations.append(editingMathString)
+                }
+                
+                editingLatexString = ""
+                editingMathString = ""
+                editingIndex = nil
+                
+                Task { await EditEquationTip.editEquationEvent.donate()}
+                
+            } label: {
+                Text(editingIndex != nil ? "Update Equation" : "Add Equation")
+                    .frame(maxWidth: .infinity)
+                    .padding(10)
+                    .cornerRadius(15)
+            }
+            .buttonStyle(.glassProminent)
+            .padding(.top, 10)
+        }
+        .padding()
+        .frame(maxHeight: .infinity, alignment: .top)
+        
+        
+        .background(
+            Image("Space")
+                .resizable()
+                .scaledToFill()
+                .backgroundExtensionEffect()
+            
+        )
+        
+        .navigationBarTitleDisplayMode(.inline)
+        .onAppear {
+            Task { await EditEquationTip.customConstellationViewVisitedEvent.donate()}
+        }
+        .onChange(of: consetallionModal.equations) { _ in
+            updateStarsFromEquations()
         }
         .navigationViewStyle(.stack)
     }
-
-    // MARK: - Load from SwiftData
-    private func loadConstellation() {
-        let service = ConstellationDataService(context: context)
-        if let constellation = service.fetchConstellations(userId: UIDevice.current.identifierForVendor!.uuidString)
-            .first(where: { $0.id == ID }) {
-            arrayOfEquations = constellation.equations
-            constellationName = constellation.name
-            startEndCoords = constellation.startEndCords
-        }
-    }
-
-    // MARK: - Save to SwiftData
-    private func saveConstellation() {
-        let service = ConstellationDataService(context: context)
-        let equationsWithY = arrayOfEquations.map { $0.starts(with: "y =") ? $0 : "y = \($0)" }
-
-        if let constellation = service.fetchConstellations(userId: UIDevice.current.identifierForVendor!.uuidString)
-            .first(where: { $0.id == ID }) {
-            service.updateConstellation(
-                constellation: constellation,
-                newName: constellationName,
-                newEquations: equationsWithY,
-                newStartEndCords: startEndCoords
-            )
-        }
-    }
-
     // MARK: - Star Update
     private func updateStarsFromEquations() {
         stars = []
         successfulLines = []
-
-        for eq in arrayOfEquations {
+        
+        for eq in consetallionModal.equations {
             let engine = MathEngine(equation: eq)
             guard let points = engine.evaluate(), !points.isEmpty else { continue }
-
+            
             stars.append(contentsOf: points.map { CGPoint(x: $0.x, y: $0.y) })
             successfulLines.append(points)
         }

@@ -79,22 +79,12 @@ struct MathKeyboardView: View {
                                 Text(key.display)
                                     .font(.system(size: 20, weight: .semibold))
                                     .foregroundColor(key.type == .backspace ? .white : .primary.opacity(0.9))
-                                    .frame(width: keyWidth, height: 56)
-                                    .background(
-                                        ZStack {
-                                            // Liquid glass effect
-                                            RoundedRectangle(cornerRadius: 16)
-                                                .fill(
-                                                    LinearGradient(
-                                                        gradient: Gradient(colors: key.type == .backspace ? [Color.red.opacity(0.9), Color.red.opacity(0.6)] : [Color.white.opacity(0.35), Color.white.opacity(0.15)]),
-                                                        startPoint: .topLeading,
-                                                        endPoint: .bottomTrailing
-                                                    )
-                                                )
-                                        }
-                                    )
-                                    .contentShape(RoundedRectangle(cornerRadius: 16))
+                                    .frame(maxWidth: .infinity)
+                                    .frame(maxHeight: .infinity)
+                                    
                             }
+                            .buttonStyle(.glass)
+                            .frame(width: keyWidth, height: 56)
                             .accessibilityLabel(accessibilityLabel(for: key))
                         }
                         if row.count < maxKeysInRow {

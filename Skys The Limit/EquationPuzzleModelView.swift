@@ -21,7 +21,7 @@ class EquationPuzzleViewModel: ObservableObject {
     @Published var connectedStarIndices: Set<Int> = []
 
     // The current user input state
-    @Published var currentLatexString: String = "y="
+    @Published var currentLatexString: String = ""
     @Published var currentGraphPoints: [(x: Double, y: Double)] = []
 
     // The game flow state

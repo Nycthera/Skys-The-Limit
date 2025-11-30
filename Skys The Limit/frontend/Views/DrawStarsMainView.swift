@@ -8,6 +8,7 @@
 import SwiftUI
 import SwiftMath
 import TipKit
+import SwiftData
 
 struct DrawStarsMainView: View {
     @StateObject private var viewModel = EquationPuzzleViewModel()
@@ -115,15 +116,7 @@ struct DrawStarsMainView: View {
         }()
         
         // SwiftData service
-        let service = ConstellationDataService(context: context)
-        
-        service.createConstellation(
-            userId: UIDevice.current.identifierForVendor?.uuidString ?? "unknown_device",
-            name: newConstellationName,
-            equations: equationStrings,
-//            isShared: false,
-            startEndCords: startEndCoords
-        )
+        context.insert(ConstellationModel(name: newConstellationName, equations: equationStrings, startEndCords: startEndCoords))
         
         print("Saved constellation '\(newConstellationName)' with \(equationStrings.count) equations.")
     }

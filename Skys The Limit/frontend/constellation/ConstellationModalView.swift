@@ -41,19 +41,15 @@ struct ConstellationModalView: View {
                         guard !name.trimmingCharacters(in: .whitespaces).isEmpty else { return }
 
                         // Use SwiftData service
-                        let service = ConstellationDataService(context: context)
+                        
 
                         // Generate placeholder coords
                         let startEndCords: [String] = []
 
                         // Save using SwiftData
-                        service.createConstellation(
-                            userId: UIDevice.current.identifierForVendor?.uuidString ?? "unknown_device",
-                            name: name,
-                            equations: tempEquations,
-//                            isShared: isShared,
-                            startEndCords: startEndCords
-                        )
+
+                        
+                        context.insert(ConstellationModel(name: name, equations: tempEquations, startEndCords: startEndCords))
 
                         dismiss()
                         onSave?()

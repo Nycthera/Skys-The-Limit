@@ -1,30 +1,17 @@
 import Foundation
 import SwiftUI
 
-struct DocFormat: Codable, Identifiable {
-    let id: String
-    let userid: String
-    let equations: [String]?
-//    let isShared: Bool
-    let createdAt: Date?
-    let updatedAt: Date?
-    let name: String
-    let startEndCoords: [String]
-}
 
 struct CustomGraphCanvasView: View {
 
     // Passed from parent
     let stars: [CGPoint]
     let successfulLines: [[(x: Double, y: Double)]]
-    let equations: [String]
-    let ID: String?
-    let name: String?
-    let startEndCoords: [String]
 
     // Local states
     @State private var selectedStarCoordinates: String?
     @State private var selectedStarIndex: Int?
+    @Bindable var consetallionModal: ConstellationModel
 
     private let xRange: ClosedRange<Double> = -10...10
     private let yRange: ClosedRange<Double> = -10...10
@@ -69,10 +56,10 @@ struct CustomGraphCanvasView: View {
                                         }
 
                     // ------------------ Draw ONLY the line from startEndCoords ------------------
-                    if startEndCoords.count == 2 {
+                    if consetallionModal.startEndCords.count == 2 {
                         // Parse "x,y" into numbers
-                        let startParts = startEndCoords[0].split(separator: ",")
-                        let endParts = startEndCoords[1].split(separator: ",")
+                        let startParts = consetallionModal.startEndCords[0].split(separator: ",")
+                        let endParts = consetallionModal.startEndCords[1].split(separator: ",")
 
                         if startParts.count == 2, endParts.count == 2,
                            let sx = Double(startParts[0]),
@@ -124,19 +111,6 @@ struct CustomGraphCanvasView: View {
                 .background(Color.black.opacity(0.7))
                 .cornerRadius(12)
 
-                // ------------------ Name Label ------------------
-                if let name {
-                    VStack {
-                        Text(name)
-                            .font(.title)
-                            .foregroundColor(.yellow)
-                            .shadow(radius: 3)
-                        Spacer()
-                    }
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .allowsHitTesting(false)
-                }
-
                 // ------------------ Stars Layer (clickable info) ------------------
                 ForEach(Array(stars.enumerated()), id: \.offset) { index, star in
                     let padding: CGFloat = 15
@@ -168,13 +142,6 @@ struct CustomGraphCanvasView: View {
                     }
                     .position(x: screenX, y: screenY)
                 }
-            }
-        }
-        .onAppear {
-            print("CustomGraphCanvasView appeared.")
-            print("Equations passed:", equations)
-            if let ID {
-                print("Document ID:", ID)
             }
         }
     }

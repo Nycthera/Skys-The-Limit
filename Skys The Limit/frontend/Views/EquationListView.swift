@@ -36,7 +36,7 @@ struct EquationListView: View {
                     GameAreaView(
                         viewModel: viewModel,
                         currentMathString: $currentMathString,
-                        canvasHeight: geometry.size.height * 0.25
+                        canvasHeight: geometry.size.height * 0.20
                     )
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
@@ -110,14 +110,15 @@ struct EquationListView: View {
 
                 } label: {
                     Text("Draw Line")
-                        .font(.title)
+
                         .frame(maxWidth: .infinity)
                         .padding(10)
-                        .background(.white)
-                        .foregroundColor(.black)
+                        
                         .cornerRadius(15)
                 }
                 .disabled(viewModel.isPuzzleComplete)
+                .buttonStyle(.glassProminent)
+                .padding(20)
             }
             
             .overlay(alignment: .top) {
