@@ -4,7 +4,10 @@ import SwiftData
 struct ConstellationModalView: View {
     @Binding var name: String
     @Binding var numberOfStars: String
-    @Binding var isShared: Bool
+//    @Binding var isShared: Bool
+    
+    var onSave: (() -> Void)?
+
 
     @Environment(\.dismiss) var dismiss
     @Environment(\.modelContext) private var context
@@ -48,11 +51,12 @@ struct ConstellationModalView: View {
                             userId: UIDevice.current.identifierForVendor?.uuidString ?? "unknown_device",
                             name: name,
                             equations: tempEquations,
-                            isShared: isShared,
+//                            isShared: isShared,
                             startEndCords: startEndCords
                         )
 
                         dismiss()
+                        onSave?()
                     }
                 }
             }

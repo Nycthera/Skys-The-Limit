@@ -9,7 +9,7 @@ class ConstellationModel {
     var userId: String
     var name: String
     var equations: [String]
-    var isShared: Bool
+//    var isShared: Bool
     var startEndCords: [String]
 
     init(
@@ -17,14 +17,14 @@ class ConstellationModel {
         userId: String,
         name: String,
         equations: [String],
-        isShared: Bool,
+//        isShared: Bool,
         startEndCords: [String]
     ) {
         self.id = id
         self.userId = userId
         self.name = name
         self.equations = equations
-        self.isShared = isShared
+//        self.isShared = isShared
         self.startEndCords = startEndCords
     }
 }
@@ -45,7 +45,7 @@ class ConstellationDataService {
         userId: String,
         name: String,
         equations: [String],
-        isShared: Bool,
+//        isShared: Bool,
         startEndCords: [String]
     ) {
         let finalName = name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
@@ -56,7 +56,7 @@ class ConstellationDataService {
             userId: userId,
             name: finalName,
             equations: equations,
-            isShared: isShared,
+//            isShared: isShared,
             startEndCords: startEndCords
         )
 
@@ -94,7 +94,7 @@ class ConstellationDataService {
     ) {
         if let newName { constellation.name = newName }
         if let newEquations { constellation.equations = newEquations }
-        if let newIsShared { constellation.isShared = newIsShared }
+//        if let newIsShared { constellation.isShared = newIsShared }
         if let newStartEndCords { constellation.startEndCords = newStartEndCords }
 
         do {

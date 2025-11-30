@@ -5,7 +5,7 @@ struct DocFormat: Codable, Identifiable {
     let id: String
     let userid: String
     let equations: [String]?
-    let isShared: Bool
+//    let isShared: Bool
     let createdAt: Date?
     let updatedAt: Date?
     let name: String

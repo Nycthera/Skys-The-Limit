@@ -14,7 +14,7 @@ struct ConstellationView: View {
     @State private var showModal = false
     @State private var constellationName = ""
     @State private var numberOfStars: Int?
-    @State private var isShared = false
+//    @State private var isShared = false
     
     @State private var selectedConstellation: ConstellationModel?
     @State private var showDeleteAlert = false
@@ -79,8 +79,10 @@ struct ConstellationView: View {
                             numberOfStars = Int(trimmed)
                         }
                     ),
-                    isShared: $isShared
-                )
+//                    isShared: $isShared
+                ) {
+                    openLatestConstellation()
+                }
             }
         }
         .fullScreenCover(item: $selectedConstellation) { constellation in
@@ -101,6 +103,12 @@ struct ConstellationView: View {
             Text("Are you sure you want to delete “\(constellationToDelete?.name ?? "")”?")
         }
     }
+    
+    func openLatestConstellation() {
+        let latest = constellationsList.last
+        selectedConstellation = latest
+    }
+
 }
 
 // ==========================================================

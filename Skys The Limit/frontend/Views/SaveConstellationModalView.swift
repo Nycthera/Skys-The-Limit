@@ -9,7 +9,7 @@ struct SaveConstellationModalView: View {
     var docID: String?
     var deviceID = UIDevice.current.identifierForVendor?.uuidString ?? "unknown_device"
 
-    @State private var isShared: Bool = false
+//    @State private var isShared: Bool = false
 
     var onSave: (() -> Void)?
     var onCancel: (() -> Void)?
