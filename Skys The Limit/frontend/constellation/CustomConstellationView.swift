@@ -5,13 +5,14 @@ import TipKit
 
 struct CustomConstellationView: View {
     // MARK: - State
-    @State private var arrayOfEquations: [String] = []
+//    @State private var arrayOfEquations: [String] = []
+    
     @State private var stars: [CGPoint] = []
     @State private var successfulLines: [[(x: Double, y: Double)]] = []
 
-    @State private var editingLatexString: String = ""
-    @State private var editingMathString: String = ""
-    @State private var editingIndex: Int?
+//    @State private var editingLatexString: String = ""
+//    @State private var editingMathString: String = ""
+//    @State private var editingIndex: Int?
 
     @State private var showSaveModal = false
 
@@ -22,6 +23,12 @@ struct CustomConstellationView: View {
     @Environment(\.modelContext) private var context
 
     let ID: String
+     
+     @Binding var arrayOfEquations: [String]
+     @Binding var editingLatexString: String
+     @Binding var editingMathString: String
+     @Binding var editingIndex: Int?
+    
     private let sidebarWidth: CGFloat = 250
 
     var body: some View {
