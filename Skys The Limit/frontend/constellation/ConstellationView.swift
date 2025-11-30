@@ -84,7 +84,7 @@ struct ConstellationView: View {
             }
         }
         .fullScreenCover(item: $selectedConstellation) { constellation in
-            CustomConstellationView(ID: constellation.id)
+            MyConstellationMainView(ID: constellation.id)
         }
         .alert("Delete Constellation?", isPresented: $showDeleteAlert) {
             Button("Delete", role: .destructive) {
