@@ -37,7 +37,6 @@ struct SavedConstellationMainView: View {
                     ID: $consetallionModal.id
                 )
                 
-                //the error is here cannot find geometry in scope
             } detail: {
                 CustomConstellationView(
                     editingLatexString: $editingLatexString,

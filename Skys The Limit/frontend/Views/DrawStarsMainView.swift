@@ -122,45 +122,29 @@ struct DrawStarsMainView: View {
     }
 }
 
-
 private struct SidebarView: View {
     let width: CGFloat
     let stars: [CGPoint]
     let successfulEquations: [String]
-    
+
     var body: some View {
-        ZStack {
-            Color.black.opacity(0.5)
-                .ignoresSafeArea()
-            
-            VStack(spacing: 12) {
-                Text("Equations")
-                    .font(.title)
-                    .foregroundColor(.white)
-                
-                ScrollView {
-                    VStack(alignment: .leading, spacing: 5) {
-                        ForEach(successfulEquations, id: \.self) { equation in
-                            MathView(
-                                equation: equation,
-                                textAlignment: .left,
-                                fontSize: 31
-                            )
-                            .foregroundStyle(.white)
-                            .background(Color.white.opacity(0.1))
-                            .cornerRadius(8)
-                            .padding(3)
-                            
-                        }
-                    }
+        VStack(spacing: 12) {
+            List {
+                ForEach(successfulEquations, id: \.self) { eq in
+                    MathView(
+                        equation: "y=\(eq)",
+                        textAlignment: .left,
+                        fontSize: 31
+                    )
+                    .foregroundStyle(.white)
+                    .listRowBackground(Color.clear)
                 }
-                
-                Spacer()
             }
-            
+            .listStyle(.plain)
+            .padding(.horizontal, 20)   // <-- Now it will show
         }
+        .navigationTitle("Equations")
+        .frame(width: width)            // <-- IMPORTANT: Your width is applied here
     }
 }
-
-
 

@@ -57,7 +57,7 @@ struct MathKeyboardView: View {
             MathKey(display: "y", mathValue: "y", type: .character),
             
 //            MathKey(display: "/", mathValue: "/", type: .character),
-            //                MathKey(display: "=", mathValue: "=", type: .character),
+            MathKey(display: "=", mathValue: "=", type: .character),
             //                MathKey(display: "{", mathValue: "{", type: .character),
             //                MathKey(display: "}", mathValue: "}", type: .character),
             MathKey(display: "⌫", mathValue: "", type: .backspace)

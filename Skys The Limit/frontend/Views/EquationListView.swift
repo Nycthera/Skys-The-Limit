@@ -5,44 +5,45 @@ import SwiftData
 struct EquationListView: View {
     @ObservedObject var viewModel: EquationPuzzleViewModel
     @EnvironmentObject var equationStore: EquationStore
-
+    
     @Environment(\.modelContext) private var context    // ← SwiftData context
-
+    
     @State private var currentMathString: String = ""
-
+    
     // confetti stuff
     @State private var isCelebrating = false
     @State private var goHome = false
-
+    
     // saving constellation
     @State private var showSaveModal = false
     @State private var newConstellationName = ""
-
+    
     var body: some View {
         ZStack {
-
+            
             // HIDDEN NAV LINK TO HOME
             NavigationLink(destination: MainMenuView(), isActive: $goHome) {
                 EmptyView()
             }
             .hidden()
-
-            Image("Space")
-                .resizable()
-                .aspectRatio(contentMode: .fill)
-                .edgesIgnoringSafeArea(.all)
-
             GeometryReader { geometry in
-                    GameAreaView(
-                        viewModel: viewModel,
-                        currentMathString: $currentMathString,
-                        canvasHeight: geometry.size.height * 0.20
-                    )
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                GameAreaView(
+                    viewModel: viewModel,
+                    currentMathString: $currentMathString,
+                    canvasHeight: geometry.size.height * 0.20
+                )
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
+            .background(
+                Image("Space")
+                    .resizable()
+                    .scaledToFill()
+                    .backgroundExtensionEffect()
+                
+            )
         }
     }
-
+    
     // ==========================================================
     //                     GAME AREA VIEW
     // ==========================================================
@@ -56,16 +57,17 @@ struct EquationListView: View {
         @State private var isConfirmingLine = false
 
         var body: some View {
-            VStack(spacing: 10){
+            VStack(spacing: 14) {
 
+                // TITLE
                 if !viewModel.isPuzzleComplete &&
                     viewModel.stars.count > viewModel.currentTargetIndex + 1 {
 
                     Text("Connect Star \(viewModel.currentTargetIndex + 1) → Star \(viewModel.currentTargetIndex + 2)")
-                        .font(.largeTitle)
-                        .foregroundColor(.yellow)
+                        .foregroundColor(.white)
                 }
 
+                // CANVAS
                 GraphCanvasView(
                     stars: viewModel.stars,
                     successfulLines: viewModel.successfulLines,
@@ -73,54 +75,61 @@ struct EquationListView: View {
                     currentTargetIndex: viewModel.currentTargetIndex,
                     connectedStarIndices: viewModel.connectedStarIndices
                 )
-                .frame(height: canvasHeight)
-//                .frame(height: geo.size.height * 0.5)
-                
+
+                // CURRENT LATEX DISPLAY
                 MathView(
                     equation: viewModel.currentLatexString,
                     fontSize: 31
                 )
-                .frame(maxWidth: .infinity, minHeight: 30, maxHeight: 30)
+                .frame(maxWidth: .infinity, minHeight: 30, maxHeight: 42)
                 .background(Color.black.opacity(0.5))
                 .cornerRadius(12)
+                .padding(.horizontal, 20)
 
-                MathKeyboardView(
-                    latexString: $viewModel.currentLatexString,
-                    mathString: $currentMathString
-                )
+                // KEYBOARD + BUTTON (aligned)
+                VStack(spacing: 25) {
 
-                Button {
-                    let previousIndex = viewModel.currentTargetIndex
-                    
-                    viewModel.checkCurrentLineSolution()
+                    // KEYBOARD
+                    MathKeyboardView(
+                        latexString: $viewModel.currentLatexString,
+                        mathString: $currentMathString
+                    )
+                    .frame(maxWidth: .infinity)
+                    .padding(.horizontal, 20)     // SAME AS BUTTON
 
-                    let success = viewModel.currentTargetIndex > previousIndex
+                    // DRAW LINE BUTTON (aligned)
+                    Button {
+                        let previousIndex = viewModel.currentTargetIndex
 
-                    if !success {
-                        viewModel.updateUserGraph()
-                        showToast = true
-                        toastMessage = "Wrong Equation!"
+                        viewModel.checkCurrentLineSolution()
 
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-                            showToast = false
+                        let success = viewModel.currentTargetIndex > previousIndex
+
+                        if !success {
+                            viewModel.updateUserGraph()
+                            showToast = true
+                            toastMessage = "Wrong Equation!"
+
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                                showToast = false
+                            }
+                        } else {
+                            viewModel.updateUserGraph()
                         }
-                    } else {
-                        viewModel.updateUserGraph()
+
+                    } label: {
+                        Text("Draw Line")
+                            .frame(maxWidth: .infinity)
+                            .padding(12)
+                            .cornerRadius(15)
                     }
+                    .disabled(viewModel.isPuzzleComplete)
+                    .buttonStyle(.glassProminent)
+                    .padding(.horizontal, 20)
 
-                } label: {
-                    Text("Draw Line")
+                } // VStack
 
-                        .frame(maxWidth: .infinity)
-                        .padding(10)
-                        
-                        .cornerRadius(15)
-                }
-                .disabled(viewModel.isPuzzleComplete)
-                .buttonStyle(.glassProminent)
-                .padding(20)
-            }
-            
+            } // main VStack
             .overlay(alignment: .top) {
                 if showToast {
                     Text(toastMessage)
@@ -133,7 +142,7 @@ struct EquationListView: View {
                 }
             }
             .animation(.easeInOut, value: showToast)
-
         }
     }
+
 }
