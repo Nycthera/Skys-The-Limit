@@ -249,3 +249,44 @@ final class MathEngine {
         return points
     }
 }
+
+// ------------------------------------------------------------
+// MARK: - Extract Linear Formula (m, c)
+// ------------------------------------------------------------
+extension MathEngine {
+
+    /// Extracts slope (m) and intercept (c) from equations like:
+    /// y=mx+c, y=-4x-5, y=x+3, y=-x, y=7, etc.
+    func extractLineFormula() -> (m: Double, c: Double)? {
+        var eq = equation.replacingOccurrences(of: " ", with: "")
+
+        // Must start with "y="
+        guard eq.starts(with: "y=") else { return nil }
+        eq = String(eq.dropFirst(2)) // remove "y="
+
+        // If equation is only a constant: y = 5
+        if !eq.contains("x") {
+            if let c = Double(eq) {
+                return (m: 0, c: c)
+            }
+            return nil
+        }
+
+        // Split at 'x'
+        let parts = eq.split(separator: "x", maxSplits: 1, omittingEmptySubsequences: false)
+        if parts.count != 2 { return nil }
+
+        // Part before x → slope (m)
+        var mString = String(parts[0])
+        if mString == "" { mString = "1" }      // "x+5" means 1x
+        if mString == "-" { mString = "-1" }    // "-x+5" means -1x
+
+        guard let m = Double(mString) else { return nil }
+
+        // Part after x → intercept (c)
+        let cString = String(parts[1])
+        let c = Double(cString) ?? 0
+
+        return (m: m, c: c)
+    }
+}

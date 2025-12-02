@@ -56,9 +56,9 @@ struct CustomConstellationView: View {
                 guard !editingMathString.isEmpty else { return }
                 
                 if let index = editingIndex {
-                    consetallionModal.equations[index] = editingMathString
+                    consetallionModal.equations[index] = "y=\(editingMathString)"
                 } else {
-                    consetallionModal.equations.append(editingMathString)
+                    consetallionModal.equations.append("y=\(editingMathString)")
                 }
                 
                 editingLatexString = ""

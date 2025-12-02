@@ -39,48 +39,7 @@ struct MyConstellationView: View {
                         .tipBackground(.white.opacity(0.7))
                     
                     if allConstellations.isEmpty {
-                        // ========================
-                        // Content Unavailable View
-                        // ========================
-                        VStack(spacing: 20) {
-                            // Pulsating sparkle icon
-                            Image(systemName: "sparkles")
-                                .font(.system(size: 80))
-                                .foregroundStyle(
-                                    LinearGradient(
-                                        colors: [Color.white.opacity(0.7), Color.yellow.opacity(0.8)],
-                                        startPoint: .topLeading,
-                                        endPoint: .bottomTrailing
-                                    )
-                                )
-                                .shadow(color: Color.white.opacity(0.5), radius: 20, x: 0, y: 0)
-                                .scaleEffect(showGlow ? 1.1 : 0.95)
-                                .animation(.easeInOut(duration: 1).repeatForever(autoreverses: true), value: showGlow)
-                            
-                            Text("No Constellations Yet")
-                                .font(.title)
-                                .fontWeight(.semibold)
-                                .foregroundColor(.white.opacity(0.9))
-                            
-                            Text("Tap the + button below to create your first constellation and start connecting the stars!")
-                                .font(.body)
-                                .multilineTextAlignment(.center)
-                                .foregroundColor(.white.opacity(0.6))
-                                .padding(.horizontal, 40)
-                        }
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                        .background(
-                            LinearGradient(
-                                colors: [Color.black.opacity(0.8), Color.black.opacity(0.95)],
-                                startPoint: .top,
-                                endPoint: .bottom
-                            )
-                            .edgesIgnoringSafeArea(.all)
-                        )
-                        .onAppear {
-                            showGlow = true
-                        }
-                        
+                       ContentUnavailableView("No Constellations", systemImage: "sparkles", description: Text("Create a constellation to get started."))
                     } else {
                         // ========================
                         // Existing Grid of Constellations

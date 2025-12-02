@@ -4,7 +4,7 @@ import TipKit
 struct ContentView: View {
     var body: some View {
         TabView {
-            Tab("Draw the stars", systemImage: "scribble.variable") {
+            Tab("Draw the Stars", systemImage: "scribble.variable") {
                 DrawStarsMainView()
             }
             

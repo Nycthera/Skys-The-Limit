@@ -41,6 +41,7 @@ struct DrawStarsMainView: View {
             // PUZZLE COMPLETE OVERLAY
             if viewModel.isPuzzleComplete {
                 ZStack {
+                    
                     ConfettiView(isAnimating: $isCelebrating)
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                         .allowsHitTesting(false)
@@ -51,16 +52,25 @@ struct DrawStarsMainView: View {
                         Spacer()
                         Text("You Win!")
                             .font(.largeTitle)
-                            .foregroundColor(.yellow)
-                            .shadow(radius: 5)
+                            .fontWeight(.bold)
+                        
+                        HStack{
+                            Button("Save") {
+                                showSaveModal = true
+                            }
+                            .buttonStyle(.bordered)
+                            Button("Done") {
+                                viewModel.isPuzzleComplete = false
+                                isCelebrating = false
+                                viewModel.generateNewPuzzle()
+                            }
+                            .buttonStyle(.borderedProminent)
+                        }
+                        
                         Spacer()
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .contentShape(Rectangle())
-                    .onTapGesture {
-                        isCelebrating = false
-                        showSaveModal = true
-                    }
                     .zIndex(20)
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -69,7 +79,9 @@ struct DrawStarsMainView: View {
                     DispatchQueue.main.async {
                         isCelebrating = true
                     }
+                    
                 }
+                
             }
         }
         .sheet(isPresented: $showSaveModal) {
@@ -129,19 +141,23 @@ private struct SidebarView: View {
 
     var body: some View {
         VStack(spacing: 12) {
-            List {
-                ForEach(successfulEquations, id: \.self) { eq in
-                    MathView(
-                        equation: "y=\(eq)",
-                        textAlignment: .left,
-                        fontSize: 31
-                    )
-                    .foregroundStyle(.white)
-                    .listRowBackground(Color.clear)
+            if successfulEquations.isEmpty {
+                ContentUnavailableView("No Equations", systemImage: "function", description: Text("Create an equation to get started."))
+            } else
+            {
+                List {
+                    ForEach(successfulEquations, id: \.self) { eq in
+                        MathView(
+                            equation: "\(eq)",
+                            textAlignment: .left,
+                            fontSize: 31
+                        )
+                        .foregroundStyle(.white)
+                        .listRowBackground(Color.clear)
+                    }
                 }
+                .listStyle(.plain)
             }
-            .listStyle(.plain)
-            .padding(.horizontal, 20)   // <-- Now it will show
         }
         .navigationTitle("Equations")
         .frame(width: width)            // <-- IMPORTANT: Your width is applied here

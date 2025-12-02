@@ -39,7 +39,6 @@ struct EquationListView: View {
                     .resizable()
                     .scaledToFill()
                     .backgroundExtensionEffect()
-                
             )
         }
     }
@@ -54,6 +53,7 @@ struct EquationListView: View {
         @ObservedObject var viewModel: EquationPuzzleViewModel
         @Binding var currentMathString: String
         let canvasHeight: CGFloat
+        
         @State private var isConfirmingLine = false
 
         var body: some View {
@@ -95,26 +95,34 @@ struct EquationListView: View {
                         mathString: $currentMathString
                     )
                     .frame(maxWidth: .infinity)
-                    .padding(.horizontal, 20)     // SAME AS BUTTON
+                    .padding(.horizontal, 20)
 
-                    // DRAW LINE BUTTON (aligned)
+                    // ============================
+                    //      FIXED DRAW LINE BUTTON
+                    // ============================
                     Button {
                         let previousIndex = viewModel.currentTargetIndex
-
+                        
+                        // Only checks correctness — does NOT update graph
                         viewModel.checkCurrentLineSolution()
-
+                        
                         let success = viewModel.currentTargetIndex > previousIndex
 
-                        if !success {
+                        if success {
+                            // Only update graph when correct
                             viewModel.updateUserGraph()
-                            showToast = true
+
+                        } else {
+
+                            // If you do NOT want wrong lines drawn, comment out:
+                            viewModel.updateUserGraph()
+
                             toastMessage = "Wrong Equation!"
+                            showToast = true
 
                             DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
                                 showToast = false
                             }
-                        } else {
-                            viewModel.updateUserGraph()
                         }
 
                     } label: {
@@ -126,6 +134,7 @@ struct EquationListView: View {
                     .disabled(viewModel.isPuzzleComplete)
                     .buttonStyle(.glassProminent)
                     .padding(.horizontal, 20)
+                    // ============================
 
                 } // VStack
 

@@ -39,6 +39,8 @@ class EquationPuzzleViewModel: ObservableObject {
         currentTargetIndex = 0
         isPuzzleComplete = false
         resetCurrentLine()
+        currentGraphPoints = []
+        successfulEquations = []
 
         var usedPoints = Set<CGPoint>()
 
@@ -88,16 +90,26 @@ class EquationPuzzleViewModel: ObservableObject {
 
         let starA = stars[currentTargetIndex]
         let starB = stars[currentTargetIndex + 1]
-        let tolerance = 0.5
 
-        let connectsStarA = lineContainsPoint(line: currentGraphPoints, point: starA, tolerance: tolerance)
-        let connectsStarB = lineContainsPoint(line: currentGraphPoints, point: starB, tolerance: tolerance)
+        // Parse equation (y = mx + c)
+        let engine = MathEngine(equation: currentLatexString)
+        guard let (m, c) = engine.extractLineFormula() else {
+            return   // Could not parse user equation
+        }
 
-        if connectsStarA && connectsStarB {
+        func matches(_ star: CGPoint) -> Bool {
+            let expectedY = m * star.x + c
+            return abs(Double(star.y) - expectedY) < 0.25
+        }
+
+        let connectsA = matches(starA)
+        let connectsB = matches(starB)
+
+        if connectsA && connectsB {
+            // Correct!
+            generateLinePoints()
             successfulLines.append(currentGraphPoints)
             successfulEquations.append(currentLatexString)
-
-            // Mark first star as connected
             connectedStarIndices.insert(currentTargetIndex)
             newLineAdded.toggle()
 
@@ -105,9 +117,11 @@ class EquationPuzzleViewModel: ObservableObject {
             if currentTargetIndex >= stars.count - 1 {
                 isPuzzleComplete = true
             }
+
             resetCurrentLine()
         }
     }
+
 
     private func resetCurrentLine() {
         currentLatexString = "y="

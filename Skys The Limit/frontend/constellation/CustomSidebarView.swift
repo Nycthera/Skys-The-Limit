@@ -30,11 +30,12 @@ struct CustomSidebarView: View {
                         editingIndex = idx
                     } label: {
                         MathView(
-                            equation: "y=\(equations[idx])",
+                            equation: "\(equations[idx])",
                             textAlignment: .left,
                             fontSize: 31
                         )
                         .foregroundStyle(.white)
+                        .frame(maxWidth: .infinity, alignment: .leading)
                     }
                     .listRowBackground(editingIndex == idx ? Color.blue : Color.clear)
                 }
